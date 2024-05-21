@@ -25,5 +25,7 @@ func (s *Server) Run() error {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(logger.SetLogger())
+
+	s.RegisterRoutes(r)
 	return r.Run(s.Bind)
 }
