@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/cmj0121/relink/pkg/squash"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 )
@@ -8,12 +9,15 @@ import (
 // The server instance to hold settings and run the RESTFul API server.
 type Server struct {
 	Bind string `short:"b" default:":8080" help:"The address to bind the server."`
+
+	squash.Squash
 }
 
 // Create a new instance of Server with the default settings.
 func New() *Server {
 	return &Server{
-		Bind: ":8080",
+		Bind:   ":8080",
+		Squash: *squash.New(),
 	}
 }
 
