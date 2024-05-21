@@ -1,0 +1,34 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.40.0
+    hooks:
+      - id: markdownlint-fix
+
+  # -------- shell-script related linter --------
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: shellcheck
+      - id: script-must-have-extension
+      - id: script-must-not-have-extension
+      - id: shfmt
+
+  # -------- golang related linter --------
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.58.2
+    hooks:
+      - id: golangci-lint
+
+  # -------- security related linter --------
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+        # run the detect mode and show all the leak credentials
+        entry: gitleaks detect --verbose --redact
