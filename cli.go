@@ -6,12 +6,14 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/cmj0121/relink/pkg/server"
+	"github.com/cmj0121/relink/pkg/squash"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 type SubCommand struct {
 	Server server.Server `cmd:"" help:"Run the RESTFul API server."`
+	Squash squash.Squash `cmd:"" help:"Squash the link and make it shorter."`
 }
 
 // The main instance to hold the arguments and options, and to run the command.
@@ -42,6 +44,8 @@ func (r *ReLink) Run(ctx *kong.Context) error {
 	switch subcmd := ctx.Command(); subcmd {
 	case "server":
 		return r.Server.Run()
+	case "squash <source>":
+		return r.Squash.Run()
 	default:
 		log.Warn().Str("command", subcmd).Msg("not implemented sub-command")
 		return fmt.Errorf("not implemented sub-command: %s", subcmd)
