@@ -1,17 +1,26 @@
 package relink
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/alecthomas/kong"
+	"github.com/cmj0121/relink/pkg/server"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
+
+type SubCommand struct {
+	Server server.Server `cmd:"" help:"Run the RESTFul API server."`
+}
 
 // The main instance to hold the arguments and options, and to run the command.
 type ReLink struct {
 	// The verbose level of the command.
 	Verbose int `short:"v" type:"counter" help:"Set the verbose level of the command."`
+
+	// The sub-command to run.
+	SubCommand `cmd:"" help:"The sub-command to run."`
 }
 
 // Create a new instance of ReLink with the default settings.
@@ -21,16 +30,22 @@ func New() *ReLink {
 
 // Parse the arguments and options from the command line, and run the command.
 func (r *ReLink) ParseAndRun() error {
-	kong.Parse(r)
-	return r.Run()
+	ctx := kong.Parse(r)
+	return r.Run(ctx)
 }
 
 // Run the command with the known arguments and options.
-func (r *ReLink) Run() error {
+func (r *ReLink) Run(ctx *kong.Context) error {
 	r.prologue()
 	defer r.epilogue()
 
-	return nil
+	switch subcmd := ctx.Command(); subcmd {
+	case "server":
+		return r.Server.Run()
+	default:
+		log.Warn().Str("command", subcmd).Msg("not implemented sub-command")
+		return fmt.Errorf("not implemented sub-command: %s", subcmd)
+	}
 }
 
 // setup everything before running the command
