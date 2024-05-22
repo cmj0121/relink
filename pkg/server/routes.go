@@ -16,10 +16,15 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 // Solve the squash link and redirect to the original link.
 func (s *Server) routeSolveSquash(c *gin.Context) {
 	// solve the squash link to get the original link
-	link := "https://example.com"
+	squashed := c.Param("squash")
+	link, ok := s.Squash.Storage.SearchValue(squashed)
 
-	// use HTTP 307 to redirect to the original link to keep the original method
-	c.Redirect(http.StatusTemporaryRedirect, link)
+	if !ok || link == "" {
+		c.AbortWithStatus(http.StatusNotFound)
+	} else {
+		// use HTTP 307 to redirect to the original link to keep the original method
+		c.Redirect(http.StatusTemporaryRedirect, link)
+	}
 }
 
 // Generate the squash link and return the squashed link.
