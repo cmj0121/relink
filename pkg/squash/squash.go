@@ -15,6 +15,7 @@ const (
 
 // The instance to squash the link and make it shorter.
 type Squash struct {
+	Storage *Storage `short:"S" default:"sqlite://relink.sql" help:"The storage to save the squashed link."`
 	BaseURL *url.URL `short:"u" default:"https://401.tw" help:"The base URL to squash the link."`
 	MaxSize int      `short:"s" default:"8" help:"The maximum size of the squashed link."`
 
@@ -26,6 +27,7 @@ func New() *Squash {
 	baseURL, _ := url.Parse(DEFAULT_BASE_URL)
 
 	return &Squash{
+		Storage: NewStorage(),
 		BaseURL: baseURL,
 		MaxSize: 8,
 	}
@@ -52,16 +54,30 @@ func (s *Squash) Squash(link string) (string, error) {
 		return "", err
 	}
 
-	return s.squash(source), nil
+	return s.squash(source)
 }
 
-func (s *Squash) squash(source *url.URL) string {
-	var letters = []rune("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
-	var buf = make([]rune, s.MaxSize)
+func (s *Squash) squash(source *url.URL) (string, error) {
+	var link string
+	value := source.String()
 
-	for i := 0; i < s.MaxSize; i++ {
-		buf[i] = letters[rand.Intn(len(letters))]
+	switch key, ok := s.Storage.SearchKey(value); ok {
+	case true:
+		link = fmt.Sprintf("%s/%s", s.BaseURL.String(), key)
+	case false:
+		var letters = []rune("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+		var buf = make([]rune, s.MaxSize)
+
+		for i := 0; i < s.MaxSize; i++ {
+			buf[i] = letters[rand.Intn(len(letters))]
+		}
+
+		if err := s.Storage.Save(string(buf), value); err != nil {
+			log.Info().Err(err).Msg("failed to save the squashed link")
+			return "", err
+		}
+		link = fmt.Sprintf("%s/%s", s.BaseURL.String(), string(buf))
 	}
 
-	return fmt.Sprintf("%s/%s", s.BaseURL.String(), string(buf))
+	return link, nil
 }
