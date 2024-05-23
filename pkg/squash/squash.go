@@ -2,9 +2,9 @@ package squash
 
 import (
 	"fmt"
-	"math/rand"
 	"net/url"
 
+	"github.com/cmj0121/relink/pkg/squash/algo"
 	"github.com/rs/zerolog/log"
 )
 
@@ -15,9 +15,11 @@ const (
 
 // The instance to squash the link and make it shorter.
 type Squash struct {
-	Storage *Storage `short:"S" default:"sqlite://relink.sql" help:"The storage to save the squashed link."`
-	BaseURL *url.URL `short:"u" default:"https://401.tw" help:"The base URL to squash the link."`
-	MaxSize int      `short:"s" default:"8" help:"The maximum size of the squashed link."`
+	Storage    *Storage        `short:"S" default:"sqlite://relink.sql" help:"The storage to save the squashed link."`
+	BaseURL    *url.URL        `short:"u" default:"https://401.tw" help:"The base URL to squash the link."`
+	MinSize    int             `short:"m" default:"4" help:"The minimum size of the squashed link."`
+	MaxSize    int             `short:"M" default:"8" help:"The maximum size of the squashed link."`
+	SquashAlgo algo.SquashAlgo `short:"a" default:"hash" help:"The algorithm to squash the link."`
 
 	Source string `arg:"" optional:"" help:"The source of the link."`
 }
@@ -58,26 +60,24 @@ func (s *Squash) Squash(link string) (string, error) {
 }
 
 func (s *Squash) squash(source *url.URL) (string, error) {
-	var link string
 	value := source.String()
 
-	switch key, ok := s.Storage.SearchKey(value); ok {
-	case true:
-		link = fmt.Sprintf("%s/%s", s.BaseURL.String(), key)
-	case false:
-		var letters = []rune("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
-		var buf = make([]rune, s.MaxSize)
-
-		for i := 0; i < s.MaxSize; i++ {
-			buf[i] = letters[rand.Intn(len(letters))]
-		}
-
-		if err := s.Storage.Save(string(buf), value); err != nil {
-			log.Info().Err(err).Msg("failed to save the squashed link")
-			return "", err
-		}
-		link = fmt.Sprintf("%s/%s", s.BaseURL.String(), string(buf))
+	key, ok := s.Storage.SearchKey(value)
+	if ok {
+		log.Debug().Str("key", key).Str("value", value).Msg("found the squashed link")
+		return fmt.Sprintf("%s/%s", s.BaseURL.String(), key), nil
 	}
 
-	return link, nil
+	for n := s.MinSize; n <= s.MaxSize; n++ {
+		squashed, err := s.SquashAlgo.Squash(value, n)
+		if err != nil {
+			log.Info().Err(err).Int("size", n).Msg("failed to squash the link")
+			continue
+		}
+
+		log.Info().Str("squashed", squashed).Msg("squashed the link")
+		return fmt.Sprintf("%s/%s", s.BaseURL, squashed), s.Storage.Save(squashed, value)
+	}
+
+	return "", fmt.Errorf("failed to squash the link: %s", value)
 }
