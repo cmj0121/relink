@@ -1,0 +1,10 @@
+services:
+  relink:
+    platform: linux/amd64
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile
+    environment:
+      - BASE_URL=https://401.tw
+    ports:
+      - "8080:8080"

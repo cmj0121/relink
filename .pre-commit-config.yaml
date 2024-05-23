@@ -16,7 +16,6 @@ repos:
     hooks:
       - id: shellcheck
       - id: script-must-have-extension
-      - id: script-must-not-have-extension
       - id: shfmt
 
   # -------- golang related linter --------

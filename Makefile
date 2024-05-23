@@ -14,7 +14,6 @@ test:				# run test
 	go test -v ./...
 
 run:				# run in the local environment
-	go run cmd/$(BIN)/main.go
 
 build:				# build the binary/library
 	go build -ldflags "-w -s" -o $(BIN) cmd/$(BIN)/main.go
