@@ -31,5 +31,15 @@ func (m *Migrate) Run() error {
 		return err
 	}
 
-	return actor.Up()
+	switch err := actor.Up(); err {
+	case nil:
+	case migrate.ErrNoChange:
+		log.Info().Msg("no change")
+		return nil
+	default:
+		log.Warn().Err(err).Msg("failed to migrate the database")
+		return err
+	}
+
+	return nil
 }
