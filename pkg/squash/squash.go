@@ -19,7 +19,7 @@ type Squash struct {
 	BaseURL    *url.URL        `short:"u" default:"https://401.tw" help:"The base URL to squash the link."`
 	MinSize    int             `short:"m" default:"4" help:"The minimum size of the squashed link."`
 	MaxSize    int             `short:"M" default:"8" help:"The maximum size of the squashed link."`
-	SquashAlgo algo.SquashAlgo `short:"a" default:"rand" help:"The algorithm to squash the link."`
+	SquashAlgo algo.SquashAlgo `short:"a" default:"hash" help:"The algorithm to squash the link."`
 
 	Source string `arg:"" optional:"" help:"The source of the link."`
 }
@@ -69,12 +69,13 @@ func (s *Squash) squash(source *url.URL) (string, error) {
 	}
 
 	for n := s.MinSize; n <= s.MaxSize; n++ {
-		squashed, err := s.SquashAlgo.Squash(key, n)
+		squashed, err := s.SquashAlgo.Squash(value, n)
 		if err != nil {
 			log.Info().Err(err).Int("size", n).Msg("failed to squash the link")
 			continue
 		}
 
+		log.Info().Str("squashed", squashed).Msg("squashed the link")
 		return fmt.Sprintf("%s/%s", s.BaseURL, squashed), s.Storage.Save(squashed, value)
 	}
 
