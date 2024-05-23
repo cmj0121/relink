@@ -19,6 +19,10 @@ RUN go build -ldflags "-w -s" -o relink cmd/relink/main.go
 #######################
 FROM alpine:3.19
 
+LABEL maintainer="cmj <cmj@cmj.tw>"
+LABEL description="The simple URL shorten and rename service"
+LABEL version="0.1.0"
+
 WORKDIR /app
 
 COPY --from=builder /app/relink /usr/local/bin/relink
