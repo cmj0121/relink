@@ -124,6 +124,15 @@ class _SquashLinkState extends State<SquashLink> {
   }
 
   void squashLink(String url) async {
+    final uri = Uri.parse(url);
+    if (uri.scheme.isEmpty) {
+      setState(() {
+        _error = true;
+        _squashedLink = null;
+      });
+      return;
+    }
+
     final endpoint = Uri.parse('/api/squash?src=$url');
     final response = await http.post(endpoint);
 
