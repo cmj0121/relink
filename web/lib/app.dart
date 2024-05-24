@@ -49,7 +49,6 @@ class SquashLink extends StatefulWidget {
 class _SquashLinkState extends State<SquashLink> {
   final _textController = TextEditingController();
 
-  bool _error = false;
   String? _squashedLink;
 
   @override
@@ -83,9 +82,6 @@ class _SquashLinkState extends State<SquashLink> {
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.arrow_forward_ios_outlined),
         hintText: 'Enter a URL',
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: _error ? Colors.red : Colors.grey),
-        ),
       ),
       textInputAction: TextInputAction.go,
       onSubmitted: squashLink,
@@ -129,9 +125,15 @@ class _SquashLinkState extends State<SquashLink> {
     final uri = Uri.parse(url);
     if (uri.scheme.isEmpty) {
       setState(() {
-        _error = true;
         _squashedLink = null;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid URL: $url'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -141,11 +143,9 @@ class _SquashLinkState extends State<SquashLink> {
     setState(() {
       switch (response.statusCode) {
         case 201:
-          _error = false;
           _squashedLink = jsonDecode(response.body) as String;
           break;
         default:
-          _error = true;
           _squashedLink = null;
           break;
       }
