@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 
+import 'components.dart';
+
 class ReLinkApp extends StatelessWidget {
-  static String title = 'ReLink';
+  static String title = "ReLink";
   const ReLinkApp({Key? key});
 
   @override
@@ -12,6 +16,8 @@ class ReLinkApp extends StatelessWidget {
     return MaterialApp(
       title: title,
       home: ReLinkHomePage(title: title),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }
@@ -47,7 +53,6 @@ class SquashLink extends StatefulWidget {
 class _SquashLinkState extends State<SquashLink> {
   final _textController = TextEditingController();
 
-  bool _error = false;
   String? _squashedLink;
 
   @override
@@ -80,10 +85,7 @@ class _SquashLinkState extends State<SquashLink> {
       controller: _textController,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.arrow_forward_ios_outlined),
-        hintText: 'Enter a URL',
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: _error ? Colors.red : Colors.grey),
-        ),
+        hintText: AppLocalizations.of(context)?.txt_search_hint,
       ),
       textInputAction: TextInputAction.go,
       onSubmitted: squashLink,
@@ -118,7 +120,7 @@ class _SquashLinkState extends State<SquashLink> {
     Clipboard.setData(ClipboardData(text: _squashedLink!));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Copied to clipboard: $_squashedLink'),
+        content: Text(AppLocalizations.of(context)!.txt_copied_to_clipboard(_squashedLink!)),
       ),
     );
   }
@@ -127,9 +129,15 @@ class _SquashLinkState extends State<SquashLink> {
     final uri = Uri.parse(url);
     if (uri.scheme.isEmpty) {
       setState(() {
-        _error = true;
         _squashedLink = null;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.err_invalid_url(url)),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -139,84 +147,13 @@ class _SquashLinkState extends State<SquashLink> {
     setState(() {
       switch (response.statusCode) {
         case 201:
-          _error = false;
           _squashedLink = jsonDecode(response.body) as String;
           break;
         default:
-          _error = true;
           _squashedLink = null;
           break;
       }
     });
-  }
-}
-
-class Loading extends StatefulWidget {
-  final int size;
-  final duration;
-  final IconData icon;
-
-  Loading({Key? key, required this.icon, this.size = 5, this.duration = const Duration(seconds: 1)}) : super(key: key);
-
-  @override
-  State<Loading> createState() => _LoadingState();
-}
-
-class _LoadingState extends State<Loading> with TickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        child: buildAnimation(),
-      ),
-    );
-  }
-
-  Widget buildAnimation() {
-    List<Color> colors = [
-      Colors.grey.shade100,
-      Colors.grey.shade200,
-      Colors.grey.shade300,
-      Colors.grey.shade400,
-      Colors.grey.shade500,
-      Colors.grey.shade600,
-      Colors.grey.shade700,
-      Colors.grey.shade800,
-      Colors.grey.shade900,
-    ];
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        int index = (_controller.value * 10).toInt();
-
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(widget.size, (i) {
-            return Icon(
-              widget.icon,
-              color: colors[(index - i) % colors.length],
-            );
-          }),
-        );
-      },
-    );
   }
 }
 
