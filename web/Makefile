@@ -12,7 +12,7 @@ run:			# run in the local environment
 	flutter run -d chrome
 
 build:			# build the binary/library
-	flutter build web
+	flutter build web --base-href /view/
 
 static:			# run the static artifact
 	python3 -m http.server -d build/web

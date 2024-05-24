@@ -15,7 +15,7 @@ const (
 
 // The instance to squash the link and make it shorter.
 type Squash struct {
-	Storage    *Storage        `short:"S" default:"sqlite://relink.sql" help:"The storage to save the squashed link."`
+	Storage    *Storage        `short:"S" default:"sqlite3://relink.sql" help:"The storage to save the squashed link."`
 	BaseURL    *url.URL        `short:"u" default:"https://401.tw" help:"The base URL to squash the link."`
 	MinSize    int             `short:"m" default:"4" help:"The minimum size of the squashed link."`
 	MaxSize    int             `short:"M" default:"8" help:"The maximum size of the squashed link."`

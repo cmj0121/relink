@@ -1,16 +1,25 @@
 package server
 
 import (
+	"embed"
+	"io/fs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 // The global interface to register the routes.
-func (s *Server) RegisterRoutes(r *gin.Engine) {
+func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 	// register the route for the health check
 	r.Any("/:squash", s.routeSolveSquash)
 	r.POST("/api/squash", s.routeGenerateSquash)
+
+	// serve the static files
+	fs, _ := fs.Sub(view, "web/build/web")
+	r.StaticFS("/view", http.FS(fs))
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "/view/index.html")
+	})
 }
 
 // Solve the squash link and redirect to the original link.
@@ -42,5 +51,5 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, squashed)
+	c.JSON(http.StatusCreated, squashed)
 }

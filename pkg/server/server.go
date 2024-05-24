@@ -1,6 +1,8 @@
 package server
 
 import (
+	"embed"
+
 	"github.com/cmj0121/relink/pkg/squash"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
@@ -22,7 +24,7 @@ func New() *Server {
 }
 
 // Run the RESTFul API server with the known settings.
-func (s *Server) Run() error {
+func (s *Server) Run(view embed.FS) error {
 	// set as the release mode
 	gin.SetMode(gin.ReleaseMode)
 
@@ -30,6 +32,6 @@ func (s *Server) Run() error {
 	r.Use(gin.Recovery())
 	r.Use(logger.SetLogger())
 
-	s.RegisterRoutes(r)
+	s.RegisterRoutes(r, view)
 	return r.Run(s.Bind)
 }

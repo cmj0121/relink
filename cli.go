@@ -1,6 +1,7 @@
 package relink
 
 import (
+	"embed"
 	"fmt"
 	"os"
 
@@ -11,6 +12,9 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
+
+//go:embed web/build/web/*
+var view embed.FS
 
 type SubCommand struct {
 	Server  server.Server `cmd:"" help:"Run the RESTFul API server."`
@@ -45,7 +49,7 @@ func (r *ReLink) Run(ctx *kong.Context) error {
 
 	switch subcmd := ctx.Command(); subcmd {
 	case "server":
-		return r.Server.Run()
+		return r.Server.Run(view)
 	case "squash <source>":
 		return r.Squash.Run()
 	case "migrate <database>":

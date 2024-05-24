@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 class ReLinkApp extends StatelessWidget {
   static String title = 'ReLink';
@@ -121,17 +123,20 @@ class _SquashLinkState extends State<SquashLink> {
     );
   }
 
-  void squashLink(String url) {
-    final target = Uri.parse(url);
+  void squashLink(String url) async {
+    final endpoint = Uri.parse('/api/squash?src=$url');
+    final response = await http.post(endpoint);
 
     setState(() {
-        _error = false;
-
-      if (target.scheme.isEmpty || target.host.isEmpty) {
-        _error = true;
-        _squashedLink = null;
-      } else {
-        _squashedLink = target.host;
+      switch (response.statusCode) {
+        case 201:
+          _error = false;
+          _squashedLink = jsonDecode(response.body) as String;
+          break;
+        default:
+          _error = true;
+          _squashedLink = null;
+          break;
       }
     });
   }
