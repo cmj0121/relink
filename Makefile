@@ -1,6 +1,8 @@
 SRC := $(shell find . -name '*.go')
 BIN := relink
 
+SUBDIR := web
+
 .PHONY: all clean test run build upgrade help $(SUBDIR)
 
 all: $(SUBDIR) 		# default action
@@ -15,7 +17,7 @@ test:				# run test
 
 run:				# run in the local environment
 
-build:				# build the binary/library
+build: $(SUBDIR)	# build the binary/library
 	go build -ldflags "-w -s" -o $(BIN) cmd/$(BIN)/main.go
 
 upgrade:			# upgrade all the necessary packages

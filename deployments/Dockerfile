@@ -1,3 +1,16 @@
+##########################
+## The flutter builder  ##
+##########################
+FROM ghcr.io/cirruslabs/flutter:3.22.0 AS flutter-builder
+
+WORKDIR /app
+
+COPY web/pubspec.yaml web/pubspec.lock ./
+RUN flutter pub get
+
+COPY web .
+RUN flutter build web --release --base-href /view/
+
 #######################
 ## The builder image ##
 #######################
@@ -12,6 +25,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+COPY --from=flutter-builder /app/build/web ./web/build/web
 RUN go build -ldflags "-w -s" -o relink cmd/relink/main.go
 
 #######################
