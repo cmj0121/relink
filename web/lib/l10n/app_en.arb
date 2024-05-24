@@ -1,0 +1,5 @@
+{
+    "txt_search_hint": "Enter the URL you want to short ...",
+    "txt_copied_to_clipboard": "Copied to clipboard: {_squashedLink}",
+    "err_invalid_url": "Invalid URL: {url}"
+}

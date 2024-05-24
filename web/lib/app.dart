@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 
 import 'components.dart';
 
 class ReLinkApp extends StatelessWidget {
-  static String title = 'ReLink';
+  static String title = "ReLink";
   const ReLinkApp({Key? key});
 
   @override
@@ -14,6 +16,8 @@ class ReLinkApp extends StatelessWidget {
     return MaterialApp(
       title: title,
       home: ReLinkHomePage(title: title),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }
@@ -81,7 +85,7 @@ class _SquashLinkState extends State<SquashLink> {
       controller: _textController,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.arrow_forward_ios_outlined),
-        hintText: 'Enter a URL',
+        hintText: AppLocalizations.of(context)?.txt_search_hint,
       ),
       textInputAction: TextInputAction.go,
       onSubmitted: squashLink,
@@ -116,7 +120,7 @@ class _SquashLinkState extends State<SquashLink> {
     Clipboard.setData(ClipboardData(text: _squashedLink!));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Copied to clipboard: $_squashedLink'),
+        content: Text(AppLocalizations.of(context)!.txt_copied_to_clipboard(_squashedLink!)),
       ),
     );
   }
@@ -130,7 +134,7 @@ class _SquashLinkState extends State<SquashLink> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Invalid URL: $url'),
+          content: Text(AppLocalizations.of(context)!.err_invalid_url(url)),
           backgroundColor: Colors.red,
         ),
       );
