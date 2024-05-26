@@ -12,6 +12,7 @@ run:			# run in the local environment
 	flutter run -d chrome
 
 build:			# build the binary/library
+	cp ../assets/logo.svg web/favicon.svg
 	flutter build web --base-href /view/
 
 static:			# run the static artifact
