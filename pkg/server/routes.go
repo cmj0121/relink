@@ -16,9 +16,9 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 
 	// serve the static files
 	fs, _ := fs.Sub(view, "web/build/web")
-	r.StaticFS("/view", http.FS(fs))
+	r.StaticFS("/_", http.FS(fs))
 	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusTemporaryRedirect, "/view/index.html")
+		c.Redirect(http.StatusTemporaryRedirect, "/_/index.html")
 	})
 }
 

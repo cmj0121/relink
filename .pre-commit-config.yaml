@@ -9,6 +9,7 @@ repos:
     rev: v0.40.0
     hooks:
       - id: markdownlint-fix
+        args: [--fix]
 
   # -------- shell-script related linter --------
   - repo: https://github.com/jumanjihouse/pre-commit-hooks

@@ -9,7 +9,7 @@ COPY web/pubspec.yaml web/pubspec.lock ./
 RUN flutter pub get
 
 COPY web .
-RUN flutter build web --release --base-href /view/
+RUN flutter build web --release --base-href /_/
 
 #######################
 ## The builder image ##

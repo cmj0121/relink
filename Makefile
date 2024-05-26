@@ -16,6 +16,8 @@ test:				# run test
 	go test -v ./...
 
 run:				# run in the local environment
+	./relink migrate sqlite3://relink.sql
+	./relink server -vv
 
 build: $(SUBDIR)	# build the binary/library
 	go build -ldflags "-w -s" -o $(BIN) cmd/$(BIN)/main.go
@@ -34,5 +36,5 @@ $(SUBDIR):
 
 test run build: linter
 linter:
-	go mod tidy
-	gofmt -s -w $(SRC)
+	@go mod tidy
+	@gofmt -s -w $(SRC)
