@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/cmj0121/relink/pkg/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -35,6 +36,13 @@ func (s *Storage) UnmarshalText(_text []byte) error {
 		s.Storager, err = NewMem()
 	case "sqlite3", "sqlite":
 		s.Storager, err = NewSQLite(url)
+		if err == nil {
+			m := types.Migrate{Database: text}
+			if err := m.Run(); err != nil {
+				log.Warn().Err(err).Str("database", text).Msg("failed to migrate the database")
+				return err
+			}
+		}
 	default:
 		err := fmt.Errorf("unsupported scheme: %s", url.Scheme)
 		log.Warn().Err(err).Str("scheme", url.Scheme).Msg("unsupported scheme")

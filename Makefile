@@ -13,7 +13,7 @@ clean: $(SUBDIR)	# clean-up environment
 	@find . -name '*.sw[po]' -delete
 
 test:				# run test
-	go test -v ./...
+	go test ./...
 
 run:				# run in the local environment
 	./relink migrate sqlite3://relink.sql
