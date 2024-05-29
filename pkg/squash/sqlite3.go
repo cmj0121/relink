@@ -53,17 +53,13 @@ func (s *SQLite) SearchSource(key string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	var value string
-	err := s.db.QueryRow("SELECT value FROM relink WHERE key = ?", key).Scan(&value)
-	switch {
-	case err == sql.ErrNoRows:
+	row := s.db.QueryRow("SELECT * FROM relink WHERE key = ?", key)
+	switch record := types.NewFromRow(row); record {
+	case nil:
 		return "", false
-	case err != nil:
-		log.Warn().Err(err).Str("key", key).Msg("failed to search the value")
-		return "", false
+	default:
+		return record.Source, true
 	}
-
-	return value, true
 }
 
 // search the key by the value
@@ -71,15 +67,11 @@ func (s *SQLite) SearchHashed(value string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	var key string
-	err := s.db.QueryRow("SELECT key FROM relink WHERE value = ?", value).Scan(&key)
-	switch {
-	case err == sql.ErrNoRows:
+	row := s.db.QueryRow("SELECT * FROM relink WHERE value = ?", value)
+	switch record := types.NewFromRow(row); record {
+	case nil:
 		return "", false
-	case err != nil:
-		log.Warn().Err(err).Str("value", value).Msg("failed to search the key")
-		return "", false
+	default:
+		return record.Hashed, true
 	}
-
-	return key, true
 }

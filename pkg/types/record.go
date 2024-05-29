@@ -1,8 +1,11 @@
 package types
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 type Record struct {
@@ -29,6 +32,21 @@ func New(source, hashed, algo string) *Record {
 		Algo:      algo,
 		CreatedAt: time.Now(),
 	}
+}
+
+func NewFromRow(row *sql.Row) *Record {
+	var record Record
+
+	switch err := row.Scan(&record.Hashed, &record.Source, &record.CreatedAt); err {
+	case nil:
+		return &record
+	case sql.ErrNoRows:
+		return nil
+	default:
+		log.Warn().Err(err).Msg("failed to scan the row")
+		return nil
+	}
+
 }
 
 func (r *Record) String() string {
