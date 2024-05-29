@@ -1,6 +1,7 @@
 package squash
 
 import (
+	"context"
 	"sync"
 
 	"github.com/cmj0121/relink/pkg/types"
@@ -51,4 +52,24 @@ func (m *Mem) SearchHashed(key string) (string, bool) {
 
 	record, ok := m.squashs[key]
 	return record.Hashed, ok
+}
+
+func (m *Mem) List(ctx context.Context) <-chan *types.Record {
+	ch := make(chan *types.Record)
+
+	go func() {
+		m.mu.RLock()
+		defer m.mu.RUnlock()
+		defer close(ch)
+
+		for _, record := range m.sources {
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- record:
+			}
+		}
+	}()
+
+	return ch
 }

@@ -46,7 +46,20 @@ func NewFromRow(row *sql.Row) *Record {
 		log.Warn().Err(err).Msg("failed to scan the row")
 		return nil
 	}
+}
 
+func NewFromRows(rows *sql.Rows) *Record {
+	var record Record
+
+	switch err := rows.Scan(&record.Hashed, &record.Source, &record.CreatedAt); err {
+	case nil:
+		return &record
+	case sql.ErrNoRows:
+		return nil
+	default:
+		log.Warn().Err(err).Msg("failed to scan the row")
+		return nil
+	}
 }
 
 func (r *Record) String() string {

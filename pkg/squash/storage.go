@@ -1,6 +1,7 @@
 package squash
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 
@@ -13,6 +14,8 @@ type Storager interface {
 
 	SearchSource(key string) (string, bool)
 	SearchHashed(key string) (string, bool)
+
+	List(ctx context.Context) <-chan *types.Record
 }
 
 type Storage struct {

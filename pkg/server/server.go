@@ -10,7 +10,8 @@ import (
 
 // The server instance to hold settings and run the RESTFul API server.
 type Server struct {
-	Bind string `short:"b" default:":8080" help:"The address to bind the server."`
+	Bind      string  `short:"b" default:":8080" help:"The address to bind the server."`
+	AuthToken *string `help:"The token to authenticate the request."`
 
 	squash.Squash
 }
@@ -34,4 +35,21 @@ func (s *Server) Run(view embed.FS) error {
 
 	s.RegisterRoutes(r, view)
 	return r.Run(s.Bind)
+}
+
+// The authentication middleware to check the token.
+func (s *Server) AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("Authorization")
+
+		if s.AuthToken != nil {
+			if token == "" {
+				c.AbortWithStatus(401)
+			}
+
+			if token != *s.AuthToken {
+				c.AbortWithStatus(403)
+			}
+		}
+	}
 }

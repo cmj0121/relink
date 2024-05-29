@@ -1,6 +1,7 @@
 package squash
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -74,4 +75,34 @@ func (s *SQLite) SearchHashed(value string) (string, bool) {
 	default:
 		return record.Hashed, true
 	}
+}
+
+// list all the records
+func (s *SQLite) List(ctx context.Context) <-chan *types.Record {
+	ch := make(chan *types.Record)
+
+	go func() {
+		s.mu.RLock()
+		defer s.mu.RUnlock()
+		defer close(ch)
+
+		rows, err := s.db.Query("SELECT * FROM relink")
+		if err != nil {
+			log.Warn().Err(err).Msg("failed to list the records")
+			return
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			record := types.NewFromRows(rows)
+
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- record:
+			}
+		}
+	}()
+
+	return ch
 }
