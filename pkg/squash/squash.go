@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/cmj0121/relink/pkg/squash/algo"
+	"github.com/cmj0121/relink/pkg/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -62,7 +63,7 @@ func (s *Squash) Squash(link string) (string, error) {
 func (s *Squash) squash(source *url.URL) (string, error) {
 	value := source.String()
 
-	key, ok := s.Storage.SearchKey(value)
+	key, ok := s.Storage.SearchHashed(value)
 	if ok {
 		log.Debug().Str("key", key).Str("value", value).Msg("found the squashed link")
 		return fmt.Sprintf("%s/%s", s.BaseURL.String(), key), nil
@@ -75,8 +76,9 @@ func (s *Squash) squash(source *url.URL) (string, error) {
 			continue
 		}
 
-		log.Info().Str("squashed", squashed).Msg("squashed the link")
-		return fmt.Sprintf("%s/%s", s.BaseURL, squashed), s.Storage.Save(squashed, value)
+		record := types.New(value, squashed, string(s.SquashAlgo))
+		log.Info().Str("record", record.String()).Msg("squashed the link")
+		return fmt.Sprintf("%s/%s", s.BaseURL, squashed), s.Storage.Save(record)
 	}
 
 	return "", fmt.Errorf("failed to squash the link: %s", value)

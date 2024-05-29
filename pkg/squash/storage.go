@@ -9,9 +9,10 @@ import (
 )
 
 type Storager interface {
-	Save(key, value string) error
-	SearchValue(key string) (string, bool)
-	SearchKey(value string) (string, bool)
+	Save(record *types.Record) error
+
+	SearchSource(key string) (string, bool)
+	SearchHashed(key string) (string, bool)
 }
 
 type Storage struct {

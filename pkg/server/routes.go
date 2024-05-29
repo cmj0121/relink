@@ -26,7 +26,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 func (s *Server) routeSolveSquash(c *gin.Context) {
 	// solve the squash link to get the original link
 	squashed := c.Param("squash")
-	link, ok := s.Squash.Storage.SearchValue(squashed)
+	link, ok := s.Squash.Storage.SearchSource(squashed)
 
 	if !ok || link == "" {
 		c.AbortWithStatus(http.StatusNotFound)

@@ -4,6 +4,12 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/cmj0121/relink/pkg/types"
+)
+
+var (
+	record = types.New("source", "squashed", "algo")
 )
 
 func TestStorage(t *testing.T) {
@@ -36,20 +42,17 @@ func testStorage(storage Storager) func(t *testing.T) {
 }
 
 func testStorageSave(storage Storager, t *testing.T) {
-	key := "key"
-	value := "value"
-
-	err := storage.Save(key, value)
+	err := storage.Save(record)
 	if err != nil {
 		t.Errorf("failed to save the key-value pair: %s", err)
 	}
 }
 
 func testStorageSearch(storage Storager, t *testing.T) {
-	key := "key"
-	value := "value"
+	key := record.Hashed
+	value := record.Source
 
-	_value, ok := storage.SearchValue(key)
+	_value, ok := storage.SearchSource(key)
 	if !ok {
 		t.Errorf("failed to search the value by the key")
 	}
@@ -58,7 +61,7 @@ func testStorageSearch(storage Storager, t *testing.T) {
 		t.Errorf("the value is not equal to the original value")
 	}
 
-	_key, ok := storage.SearchKey(value)
+	_key, ok := storage.SearchHashed(value)
 	if !ok {
 		t.Errorf("failed to search the key by the value")
 	}

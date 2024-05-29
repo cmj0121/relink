@@ -3,51 +3,52 @@ package squash
 import (
 	"sync"
 
+	"github.com/cmj0121/relink/pkg/types"
 	"github.com/rs/zerolog/log"
 )
 
 type Mem struct {
 	mu sync.RWMutex
 
-	mem map[string]string
-	rev map[string]string
+	sources map[string]*types.Record
+	squashs map[string]*types.Record
 }
 
 func NewMem() (*Mem, error) {
 	return &Mem{
-		mem: make(map[string]string),
-		rev: make(map[string]string),
+		sources: make(map[string]*types.Record),
+		squashs: make(map[string]*types.Record),
 	}, nil
 }
 
 // save the key-value pair to the storage
-func (m *Mem) Save(key, value string) error {
+func (m *Mem) Save(record *types.Record) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if rev_key, ok := m.rev[value]; ok && rev_key != key {
-		log.Debug().Str("key", key).Str("value", value).Str("rev_key", rev_key).Msg("value already exists")
-		delete(m.mem, rev_key)
+	if r, ok := m.squashs[record.Hashed]; ok && r.Hashed != record.Hashed {
+		log.Debug().Str("record", r.String()).Msg("value already exists")
+		delete(m.sources, r.Hashed)
 	}
 
-	m.mem[key] = value
-	m.rev[value] = key
+	m.sources[record.Hashed] = record
+	m.squashs[record.Source] = record
 
 	return nil
 }
 
-func (m *Mem) SearchValue(key string) (string, bool) {
+func (m *Mem) SearchSource(key string) (string, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	value, ok := m.mem[key]
-	return value, ok
+	record, ok := m.sources[key]
+	return record.Source, ok
 }
 
-func (m *Mem) SearchKey(value string) (string, bool) {
+func (m *Mem) SearchHashed(key string) (string, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	key, ok := m.rev[value]
-	return key, ok
+	record, ok := m.squashs[key]
+	return record.Hashed, ok
 }

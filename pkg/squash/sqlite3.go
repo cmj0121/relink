@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/cmj0121/relink/pkg/types"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog/log"
 )
@@ -34,13 +35,13 @@ func NewSQLite(url *url.URL) (*SQLite, error) {
 }
 
 // save the key-value pair to the storage
-func (s *SQLite) Save(key, value string) error {
+func (s *SQLite) Save(record *types.Record) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	_, err := s.db.Exec("INSERT INTO relink (key, value) VALUES (?, ?)", key, value)
+	_, err := s.db.Exec("INSERT INTO relink (key, value) VALUES (?, ?)", record.Hashed, record.Source)
 	if err != nil {
-		log.Warn().Err(err).Str("key", key).Str("value", value).Msg("failed to save the key-value pair")
+		log.Warn().Err(err).Str("record", record.String()).Msg("failed to save the key-value pair")
 		return err
 	}
 
@@ -48,7 +49,7 @@ func (s *SQLite) Save(key, value string) error {
 }
 
 // search the value by the key
-func (s *SQLite) SearchValue(key string) (string, bool) {
+func (s *SQLite) SearchSource(key string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -66,7 +67,7 @@ func (s *SQLite) SearchValue(key string) (string, bool) {
 }
 
 // search the key by the value
-func (s *SQLite) SearchKey(value string) (string, bool) {
+func (s *SQLite) SearchHashed(value string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
