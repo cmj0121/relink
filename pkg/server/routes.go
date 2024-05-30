@@ -51,8 +51,11 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 		return
 	}
 
+	// the remote IP address
+	remote := c.ClientIP()
+
 	// generate the squashed link
-	squashed, err := s.Squash.Squash(src)
+	squashed, err := s.Squash.Squash(src, &remote)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

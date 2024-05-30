@@ -227,12 +227,13 @@ class _SquashListState extends State<SquashList> {
               return ListTile(
                 title: Row(
                   children: <Widget>[
-                    Text("${item['Hashed']}"),
+                    Text("${item['hashed']}"),
                     Icon(Icons.arrow_back_outlined),
-                    Text("${item['Source']}"),
+                    Text("${item['source']}"),
                   ],
                 ),
-                subtitle: Text("${item['CreatedAt']}"),
+                subtitle: Text("${item['ip']}"),
+                trailing: Text("${item['created_at']}"),
               );
             }).toList(),
           );

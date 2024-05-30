@@ -1,0 +1,1 @@
+ALTER TABLE `relink` ADD COLUMN creator_ip VARCHAR(255);

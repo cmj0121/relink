@@ -39,7 +39,7 @@ func New() *Squash {
 // Parse the arguments and options from the command line, and run the command.
 func (s *Squash) Run() error {
 	log.Info().Str("source", s.Source).Msg("squash the link")
-	squashed, err := s.Squash(s.Source)
+	squashed, err := s.Squash(s.Source, nil)
 	if err != nil {
 		return err
 	}
@@ -50,17 +50,17 @@ func (s *Squash) Run() error {
 }
 
 // Squash the link and make it shorter.
-func (s *Squash) Squash(link string) (string, error) {
+func (s *Squash) Squash(link string, remote *string) (string, error) {
 	source, err := url.Parse(link)
 	if err != nil {
 		log.Warn().Err(err).Str("link", link).Msg("failed to parse the link")
 		return "", err
 	}
 
-	return s.squash(source)
+	return s.squash(source, remote)
 }
 
-func (s *Squash) squash(source *url.URL) (string, error) {
+func (s *Squash) squash(source *url.URL, remote *string) (string, error) {
 	value := source.String()
 
 	key, ok := s.Storage.SearchHashed(value)
@@ -77,6 +77,7 @@ func (s *Squash) squash(source *url.URL) (string, error) {
 		}
 
 		record := types.New(value, squashed, string(s.SquashAlgo))
+		record.IP = remote
 		log.Info().Str("record", record.String()).Msg("squashed the link")
 		return fmt.Sprintf("%s/%s", s.BaseURL, squashed), s.Storage.Save(record)
 	}

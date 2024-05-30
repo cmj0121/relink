@@ -9,19 +9,15 @@ import (
 )
 
 type Record struct {
-	// the source of the link
-	Source string
-
-	// the squashed link
-	Hashed string
-
-	// the algorithm to squash the link
-	Algo string
+	Source string  `json:"source"`
+	Hashed string  `json:"hashed"`
+	Algo   string  `json:"algo"`
+	IP     *string `json:"ip"`
 
 	// the timestamp mixed with the source
-	CreatedAt time.Time
-	UpdatedAt *time.Time
-	DeletedAt *time.Time
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 // Create a new instance of Record with the default settings.
@@ -36,9 +32,11 @@ func New(source, hashed, algo string) *Record {
 
 func NewFromRow(row *sql.Row) *Record {
 	var record Record
+	var clientIP sql.NullString
 
-	switch err := row.Scan(&record.Hashed, &record.Source, &record.CreatedAt); err {
+	switch err := row.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt); err {
 	case nil:
+		record.IP = &clientIP.String
 		return &record
 	case sql.ErrNoRows:
 		return nil
@@ -50,9 +48,11 @@ func NewFromRow(row *sql.Row) *Record {
 
 func NewFromRows(rows *sql.Rows) *Record {
 	var record Record
+	var clientIP sql.NullString
 
-	switch err := rows.Scan(&record.Hashed, &record.Source, &record.CreatedAt); err {
+	switch err := rows.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt); err {
 	case nil:
+		record.IP = &clientIP.String
 		return &record
 	case sql.ErrNoRows:
 		return nil
