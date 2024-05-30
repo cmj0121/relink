@@ -13,11 +13,10 @@ clean: $(SUBDIR)	# clean-up environment
 	@find . -name '*.sw[po]' -delete
 
 test:				# run test
-	go test -v ./...
+	go test ./...
 
 run:				# run in the local environment
-	./relink migrate sqlite3://relink.sql
-	./relink server -vv
+	./relink server -vv -u http://localhost:8080 --auth-token=example
 
 build: $(SUBDIR)	# build the binary/library
 	go build -ldflags "-w -s" -o $(BIN) cmd/$(BIN)/main.go

@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/cmj0121/relink/pkg/squash/algo"
+	"github.com/cmj0121/relink/pkg/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -38,7 +39,7 @@ func New() *Squash {
 // Parse the arguments and options from the command line, and run the command.
 func (s *Squash) Run() error {
 	log.Info().Str("source", s.Source).Msg("squash the link")
-	squashed, err := s.Squash(s.Source)
+	squashed, err := s.Squash(s.Source, nil)
 	if err != nil {
 		return err
 	}
@@ -49,20 +50,20 @@ func (s *Squash) Run() error {
 }
 
 // Squash the link and make it shorter.
-func (s *Squash) Squash(link string) (string, error) {
+func (s *Squash) Squash(link string, remote *string) (string, error) {
 	source, err := url.Parse(link)
 	if err != nil {
 		log.Warn().Err(err).Str("link", link).Msg("failed to parse the link")
 		return "", err
 	}
 
-	return s.squash(source)
+	return s.squash(source, remote)
 }
 
-func (s *Squash) squash(source *url.URL) (string, error) {
+func (s *Squash) squash(source *url.URL, remote *string) (string, error) {
 	value := source.String()
 
-	key, ok := s.Storage.SearchKey(value)
+	key, ok := s.Storage.SearchHashed(value)
 	if ok {
 		log.Debug().Str("key", key).Str("value", value).Msg("found the squashed link")
 		return fmt.Sprintf("%s/%s", s.BaseURL.String(), key), nil
@@ -75,8 +76,10 @@ func (s *Squash) squash(source *url.URL) (string, error) {
 			continue
 		}
 
-		log.Info().Str("squashed", squashed).Msg("squashed the link")
-		return fmt.Sprintf("%s/%s", s.BaseURL, squashed), s.Storage.Save(squashed, value)
+		record := types.New(value, squashed, string(s.SquashAlgo))
+		record.IP = remote
+		log.Info().Str("record", record.String()).Msg("squashed the link")
+		return fmt.Sprintf("%s/%s", s.BaseURL, squashed), s.Storage.Save(record)
 	}
 
 	return "", fmt.Errorf("failed to squash the link: %s", value)

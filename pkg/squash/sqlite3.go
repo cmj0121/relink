@@ -1,11 +1,13 @@
 package squash
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/url"
 	"sync"
 
+	"github.com/cmj0121/relink/pkg/types"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog/log"
 )
@@ -34,13 +36,13 @@ func NewSQLite(url *url.URL) (*SQLite, error) {
 }
 
 // save the key-value pair to the storage
-func (s *SQLite) Save(key, value string) error {
+func (s *SQLite) Save(record *types.Record) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	_, err := s.db.Exec("INSERT INTO relink (key, value) VALUES (?, ?)", key, value)
+	_, err := s.db.Exec("INSERT INTO relink (key, value, creator_ip) VALUES (?, ?, ?)", record.Hashed, record.Source, record.IP)
 	if err != nil {
-		log.Warn().Err(err).Str("key", key).Str("value", value).Msg("failed to save the key-value pair")
+		log.Warn().Err(err).Str("record", record.String()).Msg("failed to save the key-value pair")
 		return err
 	}
 
@@ -48,37 +50,59 @@ func (s *SQLite) Save(key, value string) error {
 }
 
 // search the value by the key
-func (s *SQLite) SearchValue(key string) (string, bool) {
+func (s *SQLite) SearchSource(key string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	var value string
-	err := s.db.QueryRow("SELECT value FROM relink WHERE key = ?", key).Scan(&value)
-	switch {
-	case err == sql.ErrNoRows:
+	row := s.db.QueryRow("SELECT key, value, creator_ip, created_at FROM relink WHERE key = ?", key)
+	switch record := types.NewFromRow(row); record {
+	case nil:
 		return "", false
-	case err != nil:
-		log.Warn().Err(err).Str("key", key).Msg("failed to search the value")
-		return "", false
+	default:
+		return record.Source, true
 	}
-
-	return value, true
 }
 
 // search the key by the value
-func (s *SQLite) SearchKey(value string) (string, bool) {
+func (s *SQLite) SearchHashed(value string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	var key string
-	err := s.db.QueryRow("SELECT key FROM relink WHERE value = ?", value).Scan(&key)
-	switch {
-	case err == sql.ErrNoRows:
+	row := s.db.QueryRow("SELECT key, value, creator_ip, created_at FROM relink WHERE value = ?", value)
+	switch record := types.NewFromRow(row); record {
+	case nil:
 		return "", false
-	case err != nil:
-		log.Warn().Err(err).Str("value", value).Msg("failed to search the key")
-		return "", false
+	default:
+		return record.Hashed, true
 	}
+}
 
-	return key, true
+// list all the records
+func (s *SQLite) List(ctx context.Context) <-chan *types.Record {
+	ch := make(chan *types.Record)
+
+	go func() {
+		s.mu.RLock()
+		defer s.mu.RUnlock()
+		defer close(ch)
+
+		rows, err := s.db.Query("SELECT key, value, creator_ip, created_at FROM relink")
+		if err != nil {
+			log.Warn().Err(err).Msg("failed to list the records")
+			return
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			record := types.NewFromRows(rows)
+
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- record:
+			}
+		}
+	}()
+
+	return ch
 }

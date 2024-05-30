@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"net/http"
 
+	"github.com/cmj0121/relink/pkg/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,6 +14,12 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 	// register the route for the health check
 	r.Any("/:squash", s.routeSolveSquash)
 	r.POST("/api/squash", s.routeGenerateSquash)
+
+	auth := r.Group("/")
+	{
+		auth.Use(s.AuthMiddleware())
+		auth.GET("/api/squash", s.routeListSquash)
+	}
 
 	// serve the static files
 	fs, _ := fs.Sub(view, "web/build/web")
@@ -26,7 +33,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 func (s *Server) routeSolveSquash(c *gin.Context) {
 	// solve the squash link to get the original link
 	squashed := c.Param("squash")
-	link, ok := s.Squash.Storage.SearchValue(squashed)
+	link, ok := s.Squash.Storage.SearchSource(squashed)
 
 	if !ok || link == "" {
 		c.AbortWithStatus(http.StatusNotFound)
@@ -44,12 +51,31 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 		return
 	}
 
+	// the remote IP address
+	remote := c.ClientIP()
+
 	// generate the squashed link
-	squashed, err := s.Squash.Squash(src)
+	squashed, err := s.Squash.Squash(src, &remote)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, squashed)
+}
+
+// List all the squashed links.
+func (s *Server) routeListSquash(c *gin.Context) {
+	records := []*types.Record{}
+
+	for record := range s.Squash.Storage.List(c) {
+		switch record {
+		case nil:
+			continue
+		default:
+			records = append(records, record)
+		}
+	}
+
+	c.JSON(http.StatusOK, records)
 }
