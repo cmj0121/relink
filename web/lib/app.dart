@@ -244,6 +244,18 @@ class _SquashListState extends State<SquashList> {
         case 403:
           _content = buildSignin(AppLocalizations.of(context)!.txt_forbidden);
           break;
+        case 429:
+          _content = Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(AppLocalizations.of(context)!.txt_too_many_requests, style: TextStyle(fontSize: 32, color: Colors.red)),
+                SizedBox(height: 20),
+                Text(AppLocalizations.of(context)!.txt_try_again_later),
+              ],
+            ),
+          );
+          break;
         default:
           _content = buildSignin(AppLocalizations.of(context)!.txt_unknown_error);
           break;
@@ -257,7 +269,7 @@ class _SquashListState extends State<SquashList> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(text),
+          Text(text, style: TextStyle(fontSize: 32, color: Colors.red)),
           SizedBox(height: 20),
           TextField(
             controller: _textController,

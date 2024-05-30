@@ -5,5 +5,7 @@
     "txt_unauthorized": "尚未登入",
     "txt_forbidden": "尚未獲得授權",
     "txt_unknown_error": "不明錯誤",
+    "txt_too_many_requests": "太多請求",
+    "txt_try_again_later": "請稍後再嘗試 ...",
     "err_invalid_url": "不合法的連結: {url}"
 }
