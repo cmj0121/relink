@@ -16,7 +16,7 @@ test:				# run test
 	go test ./...
 
 run:				# run in the local environment
-	./relink server -vv -u http://localhost:8080
+	./relink server -vv -u http://localhost:8080 --auth-token=example
 
 build: $(SUBDIR)	# build the binary/library
 	go build -ldflags "-w -s" -o $(BIN) cmd/$(BIN)/main.go

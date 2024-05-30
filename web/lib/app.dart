@@ -7,6 +7,16 @@ import 'package:http/http.dart' as http;
 
 import 'components.dart';
 
+enum Routes {
+  pageIndex,
+  pageAdminList,
+}
+
+Map<Routes, String> RoutesPath = {
+  Routes.pageIndex: '/',
+  Routes.pageAdminList: '/_admin/list',
+};
+
 class ReLinkApp extends StatelessWidget {
   static String title = "ReLink";
   const ReLinkApp({Key? key});
@@ -15,16 +25,21 @@ class ReLinkApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: title,
-      home: ReLinkHomePage(title: title),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      initialRoute: RoutesPath[Routes.pageIndex],
+      routes: {
+        RoutesPath[Routes.pageIndex]!: (context) => ReLinkHomePage(title: title, child: SquashLink()),
+        RoutesPath[Routes.pageAdminList]!: (context) => ReLinkHomePage(title: title, child: SquashList()),
+      },
     );
   }
 }
 
 class ReLinkHomePage extends StatefulWidget {
   final String title;
-  const ReLinkHomePage({Key? key, required this.title});
+  final Widget child;
+  const ReLinkHomePage({Key? key, required this.title, required this.child});
 
   @override
   State<ReLinkHomePage> createState() => _ReLinkHomePageState();
@@ -34,8 +49,24 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Center(
-        child: SquashLink(),
+      appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.home),
+            onPressed: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(RoutesPath[Routes.pageIndex]!, (route) => false);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.admin_panel_settings),
+            onPressed: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(RoutesPath[Routes.pageAdminList]!, (route) => false);
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: widget.child,
       ),
     );
   }
@@ -154,6 +185,90 @@ class _SquashLinkState extends State<SquashLink> {
           break;
       }
     });
+  }
+}
+
+class SquashList extends StatefulWidget {
+  final double maxWidth;
+  const SquashList({Key? key, this.maxWidth=600});
+
+  @override
+  State<SquashList> createState() => _SquashListState();
+}
+
+class _SquashListState extends State<SquashList> {
+  final _textController = TextEditingController();
+  late Widget _content = CircularProgressIndicator();
+
+  @override
+  void initState() {
+    super.initState();
+    loadContent();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(maxWidth: widget.maxWidth),
+      child: _content,
+    );
+  }
+
+  void loadContent() async {
+    final endpoint = Uri.parse('/api/squash');
+    final headers = {"Authorization": "${_textController.text}"};
+    final response = await http.get(endpoint, headers: headers);
+
+    setState(() {
+      switch (response.statusCode) {
+        case 200:
+          _content = ListView(
+            children: (jsonDecode(response.body) as List<dynamic>).map((item) {
+              return ListTile(
+                title: Row(
+                  children: <Widget>[
+                    Text("${item['Hashed']}"),
+                    Icon(Icons.arrow_back_outlined),
+                    Text("${item['Source']}"),
+                  ],
+                ),
+                subtitle: Text("${item['CreatedAt']}"),
+              );
+            }).toList(),
+          );
+          break;
+        case 401:
+          _content = buildSignin(AppLocalizations.of(context)!.txt_unauthorized);
+          break;
+        case 403:
+          _content = buildSignin(AppLocalizations.of(context)!.txt_forbidden);
+          break;
+        default:
+          _content = buildSignin(AppLocalizations.of(context)!.txt_unknown_error);
+          break;
+      }
+    });
+  }
+
+  Widget buildSignin(String text) {
+    return Container(
+      constraints: BoxConstraints(maxWidth: widget.maxWidth),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(text),
+          SizedBox(height: 20),
+          TextField(
+            controller: _textController,
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.key_sharp),
+              hintText: AppLocalizations.of(context)?.txt_password,
+            ),
+            onSubmitted: (String password) => loadContent(),
+          ),
+        ],
+      ),
+    );
   }
 }
 
