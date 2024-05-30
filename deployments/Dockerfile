@@ -6,7 +6,7 @@ FROM ghcr.io/cirruslabs/flutter:3.22.0 AS flutter-builder
 WORKDIR /app
 
 COPY web/pubspec.yaml web/pubspec.lock ./
-COPY assets/logo.svg web/web/favicon.svg
+COPY assets/logo.svg web/favicon.svg
 RUN flutter pub get
 
 COPY web .
