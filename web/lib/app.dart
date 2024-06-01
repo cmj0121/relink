@@ -138,11 +138,12 @@ class _SquashLinkState extends State<SquashLink> {
     if (!showMenu) return Container();
 
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(horizontal: 60),
       child: Column(
         children: [
           TextField(
             controller: _passwordController,
+            maxLength: 32,
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.lock),
               hintText: AppLocalizations.of(context)?.txt_password,
