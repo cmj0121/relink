@@ -83,6 +83,8 @@ class SquashLink extends StatefulWidget {
 
 class _SquashLinkState extends State<SquashLink> {
   final _textController = TextEditingController();
+  final _passwordController = TextEditingController();
+  late bool showMenu = false;
 
   String? _squashedLink;
 
@@ -102,6 +104,7 @@ class _SquashLinkState extends State<SquashLink> {
           children: <Widget>[
             inputLinkField(),
             SizedBox(height: 20),
+            optionFields(),
             Loading(icon: Icons.keyboard_arrow_down_outlined),
             SizedBox(height: 20),
             squashLinkField(),
@@ -116,10 +119,38 @@ class _SquashLinkState extends State<SquashLink> {
       controller: _textController,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.arrow_forward_ios_outlined),
+        suffixIcon: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            setState(() {
+              showMenu = !showMenu;
+            });
+          },
+        ),
         hintText: AppLocalizations.of(context)?.txt_search_hint,
       ),
       textInputAction: TextInputAction.go,
       onSubmitted: squashLink,
+    );
+  }
+
+  Widget optionFields() {
+    if (!showMenu) return Container();
+
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Column(
+        children: [
+          TextField(
+            controller: _passwordController,
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.lock),
+              hintText: AppLocalizations.of(context)?.txt_password,
+            ),
+          ),
+          SizedBox(height: 20),
+        ],
+      ),
     );
   }
 
@@ -172,7 +203,7 @@ class _SquashLinkState extends State<SquashLink> {
       return;
     }
 
-    final endpoint = Uri.parse('/api/squash?src=$url');
+    final endpoint = Uri.parse('/api/squash?src=$url&password=${_passwordController.text}');
     final response = await http.post(endpoint);
 
     setState(() {
