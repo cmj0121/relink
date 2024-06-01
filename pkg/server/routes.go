@@ -33,13 +33,15 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 func (s *Server) routeSolveSquash(c *gin.Context) {
 	// solve the squash link to get the original link
 	squashed := c.Param("squash")
-	link, ok := s.Squash.Storage.SearchSource(squashed)
+	record := s.Squash.Storage.SearchSource(squashed)
 
-	if !ok || link == "" {
+	if record == nil {
 		c.AbortWithStatus(http.StatusNotFound)
-	} else {
+	} else if record.Password == nil || c.Query("password") == *record.Password {
 		// use HTTP 307 to redirect to the original link to keep the original method
-		c.Redirect(http.StatusTemporaryRedirect, link)
+		c.Redirect(http.StatusTemporaryRedirect, record.Source)
+	} else {
+		c.AbortWithStatus(http.StatusForbidden)
 	}
 }
 
@@ -55,7 +57,8 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 	remote := c.ClientIP()
 
 	// generate the squashed link
-	squashed, err := s.Squash.Squash(src, &remote)
+	passwd := c.Query("password")
+	squashed, err := s.Squash.SquashToLink(src, passwd, &remote)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -38,20 +38,28 @@ func (m *Mem) Save(record *types.Record) error {
 	return nil
 }
 
-func (m *Mem) SearchSource(key string) (string, bool) {
+func (m *Mem) SearchSource(key string) *types.Record {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	record, ok := m.sources[key]
-	return record.Source, ok
+	switch record, ok := m.sources[key]; ok {
+	case true:
+		return record
+	default:
+		return nil
+	}
 }
 
-func (m *Mem) SearchHashed(key string) (string, bool) {
+func (m *Mem) SearchHashed(key string) *types.Record {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	record, ok := m.squashs[key]
-	return record.Hashed, ok
+	switch record, ok := m.squashs[key]; ok {
+	case true:
+		return record
+	default:
+		return nil
+	}
 }
 
 func (m *Mem) List(ctx context.Context) <-chan *types.Record {
