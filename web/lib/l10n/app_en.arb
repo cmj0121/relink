@@ -6,6 +6,7 @@
     "txt_forbidden": "Forbidden",
     "txt_too_many_requests": "Too many requests",
     "txt_try_again_later": "Try again later ...",
+    "txt_need_password": "Access {code} need password ...",
     "txt_unknown_error": "Unkonwn Error",
     "err_invalid_url": "Invalid URL: {url}"
 }

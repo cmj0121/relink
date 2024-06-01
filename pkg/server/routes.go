@@ -2,6 +2,7 @@ package server
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"net/http"
 
@@ -41,7 +42,8 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 		// use HTTP 307 to redirect to the original link to keep the original method
 		c.Redirect(http.StatusTemporaryRedirect, record.Source)
 	} else {
-		c.AbortWithStatus(http.StatusForbidden)
+		link := fmt.Sprintf("/_/#/need-password-%v", squashed)
+		c.Redirect(http.StatusTemporaryRedirect, link)
 	}
 }
 
