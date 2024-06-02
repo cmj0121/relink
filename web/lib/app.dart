@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
+import 'dart:html' as html;
 
 import 'components.dart';
 
@@ -12,10 +13,18 @@ enum Routes {
   pageAdminList,
 }
 
-Map<Routes, String> RoutesPath = {
-  Routes.pageIndex: '/',
-  Routes.pageAdminList: '/_admin/list',
-};
+void routeTo(Routes route, BuildContext context) {
+  switch (route) {
+    case Routes.pageIndex:
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      break;
+    case Routes.pageAdminList:
+      Navigator.of(context).pushNamedAndRemoveUntil('/_admin/list', (route) => false);
+      break;
+    default:
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+  }
+}
 
 class ReLinkApp extends StatelessWidget {
   static String title = "ReLink";
@@ -27,10 +36,32 @@ class ReLinkApp extends StatelessWidget {
       title: title,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      initialRoute: RoutesPath[Routes.pageIndex],
-      routes: {
-        RoutesPath[Routes.pageIndex]!: (context) => ReLinkHomePage(title: title, child: SquashLink()),
-        RoutesPath[Routes.pageAdminList]!: (context) => ReLinkHomePage(title: title, child: SquashList()),
+      initialRoute: '/',
+      onGenerateRoute: (settings) {
+        final name = settings.name ?? '/';
+        final Widget child;
+
+        switch (name) {
+          case '/':
+            child = SquashLink();
+            break;
+          case '/_admin/list':
+            child = SquashList();
+            break;
+          default:
+            final match = RegExp(r'^/need-password-(\w+)');
+
+            if (!match.hasMatch(name)) {
+              Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+            }
+
+            final code = match.firstMatch(name)!.group(1);
+            child = PasswordPage(code: code);
+        }
+
+        return MaterialPageRoute(
+          builder: (context) => ReLinkHomePage(title: title, child: child),
+        );
       },
     );
   }
@@ -53,15 +84,11 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.home),
-            onPressed: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(RoutesPath[Routes.pageIndex]!, (route) => false);
-            },
+            onPressed: () { routeTo(Routes.pageIndex, context); },
           ),
           IconButton(
             icon: Icon(Icons.admin_panel_settings),
-            onPressed: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(RoutesPath[Routes.pageAdminList]!, (route) => false);
-            },
+            onPressed: () { routeTo(Routes.pageAdminList, context); },
           ),
         ],
       ),
@@ -83,6 +110,8 @@ class SquashLink extends StatefulWidget {
 
 class _SquashLinkState extends State<SquashLink> {
   final _textController = TextEditingController();
+  final _passwordController = TextEditingController();
+  late bool showMenu = false;
 
   String? _squashedLink;
 
@@ -102,6 +131,7 @@ class _SquashLinkState extends State<SquashLink> {
           children: <Widget>[
             inputLinkField(),
             SizedBox(height: 20),
+            optionFields(),
             Loading(icon: Icons.keyboard_arrow_down_outlined),
             SizedBox(height: 20),
             squashLinkField(),
@@ -116,10 +146,39 @@ class _SquashLinkState extends State<SquashLink> {
       controller: _textController,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.arrow_forward_ios_outlined),
+        suffixIcon: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            setState(() {
+              showMenu = !showMenu;
+            });
+          },
+        ),
         hintText: AppLocalizations.of(context)?.txt_search_hint,
       ),
       textInputAction: TextInputAction.go,
       onSubmitted: squashLink,
+    );
+  }
+
+  Widget optionFields() {
+    if (!showMenu) return Container();
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 60),
+      child: Column(
+        children: [
+          TextField(
+            controller: _passwordController,
+            maxLength: 32,
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.lock),
+              hintText: AppLocalizations.of(context)?.txt_password,
+            ),
+          ),
+          SizedBox(height: 20),
+        ],
+      ),
     );
   }
 
@@ -172,7 +231,7 @@ class _SquashLinkState extends State<SquashLink> {
       return;
     }
 
-    final endpoint = Uri.parse('/api/squash?src=$url');
+    final endpoint = Uri.parse('/api/squash?src=$url&password=${_passwordController.text}');
     final response = await http.post(endpoint);
 
     setState(() {
@@ -222,6 +281,8 @@ class _SquashListState extends State<SquashList> {
     setState(() {
       switch (response.statusCode) {
         case 200:
+          _content = Text('...');
+          break;
           _content = ListView(
             children: (jsonDecode(response.body) as List<dynamic>).map((item) {
               return ListTile(
@@ -278,8 +339,43 @@ class _SquashListState extends State<SquashList> {
               hintText: AppLocalizations.of(context)?.txt_password,
             ),
             onSubmitted: (String password) => loadContent(),
+            obscureText: true,
+            autocorrect: false,
+            enableSuggestions: false,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class PasswordPage extends StatelessWidget {
+  final String? code;
+  final double maxWidth;
+
+  const PasswordPage({Key? key, required this.code, this.maxWidth=600}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(AppLocalizations.of(context)!.txt_need_password(code!)),
+            TextField(
+              maxLength: 32,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.lock),
+                hintText: AppLocalizations.of(context)?.txt_password,
+              ),
+              onSubmitted: (password) {
+                html.window.location.href = '/${code}?password=${password}';
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

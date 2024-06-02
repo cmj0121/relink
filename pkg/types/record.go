@@ -14,6 +14,9 @@ type Record struct {
 	Algo   string  `json:"algo"`
 	IP     *string `json:"ip"`
 
+	// The password to protect the link
+	Password *string `json:"-"`
+
 	// the timestamp mixed with the source
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at"`
@@ -33,10 +36,12 @@ func New(source, hashed, algo string) *Record {
 func NewFromRow(row *sql.Row) *Record {
 	var record Record
 	var clientIP sql.NullString
+	var password sql.NullString
 
-	switch err := row.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt); err {
+	switch err := row.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt, &password); err {
 	case nil:
 		record.IP = &clientIP.String
+		record.Password = &password.String
 		return &record
 	case sql.ErrNoRows:
 		return nil
@@ -49,10 +54,12 @@ func NewFromRow(row *sql.Row) *Record {
 func NewFromRows(rows *sql.Rows) *Record {
 	var record Record
 	var clientIP sql.NullString
+	var password sql.NullString
 
-	switch err := rows.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt); err {
+	switch err := rows.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt, &password); err {
 	case nil:
 		record.IP = &clientIP.String
+		record.Password = &password.String
 		return &record
 	case sql.ErrNoRows:
 		return nil

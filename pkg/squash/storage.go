@@ -12,8 +12,8 @@ import (
 type Storager interface {
 	Save(record *types.Record) error
 
-	SearchSource(key string) (string, bool)
-	SearchHashed(key string) (string, bool)
+	SearchSource(key string) *types.Record
+	SearchHashed(key string) *types.Record
 
 	List(ctx context.Context) <-chan *types.Record
 }

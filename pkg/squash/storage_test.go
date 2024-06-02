@@ -52,21 +52,17 @@ func testStorageSearch(storage Storager, t *testing.T) {
 	key := record.Hashed
 	value := record.Source
 
-	_value, ok := storage.SearchSource(key)
-	if !ok {
+	record := storage.SearchSource(key)
+	if record == nil {
 		t.Errorf("failed to search the value by the key")
-	}
-
-	if _value != value {
+	} else if record.Source != value {
 		t.Errorf("the value is not equal to the original value")
 	}
 
-	_key, ok := storage.SearchHashed(value)
-	if !ok {
+	record = storage.SearchHashed(value)
+	if record == nil {
 		t.Errorf("failed to search the key by the value")
-	}
-
-	if _key != key {
+	} else if record.Hashed != key {
 		t.Errorf("the key is not equal to the original key")
 	}
 }
