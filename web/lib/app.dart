@@ -36,6 +36,9 @@ class ReLinkApp extends StatelessWidget {
       title: title,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      theme: ThemeData(
+        scaffoldBackgroundColor: const Color(0xFFEFF2F9),
+      ),
       initialRoute: '/',
       onGenerateRoute: (settings) {
         final name = settings.name ?? '/';
@@ -81,6 +84,7 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xFFCFCFE9),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.home),
