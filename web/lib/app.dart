@@ -281,20 +281,34 @@ class _SquashListState extends State<SquashList> {
     setState(() {
       switch (response.statusCode) {
         case 200:
-          _content = Text('...');
-          break;
           _content = ListView(
             children: (jsonDecode(response.body) as List<dynamic>).map((item) {
+              final Widget? icon = item['password'] == '' ? null : IconButton(
+                icon: Icon(Icons.lock),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: item['password']));
+                },
+              );
+
               return ListTile(
+                leading: SizedBox(width: 40, child: icon),
                 title: Row(
                   children: <Widget>[
-                    Text("${item['hashed']}"),
+                    InkWell(
+                      child: Text("${item['hashed']}"),
+                      onTap: () {
+                        html.window.location.href = '/${item['hashed']}';
+                      },
+                    ),
                     Icon(Icons.arrow_back_outlined),
-                    Text("${item['source']}"),
+                    Text("${item['source']}", overflow: TextOverflow.ellipsis),
                   ],
                 ),
                 subtitle: Text("${item['ip']}"),
-                trailing: Text("${item['created_at']}"),
+                trailing: Container(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Text("${item['created_at']}"),
+                ),
               );
             }).toList(),
           );
