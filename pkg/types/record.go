@@ -15,7 +15,7 @@ type Record struct {
 	IP     *string `json:"ip"`
 
 	// The password to protect the link
-	Password *string `json:"-"`
+	Password *string `json:"password"`
 
 	// the timestamp mixed with the source
 	CreatedAt time.Time  `json:"created_at"`

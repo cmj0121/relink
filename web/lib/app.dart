@@ -283,7 +283,15 @@ class _SquashListState extends State<SquashList> {
         case 200:
           _content = ListView(
             children: (jsonDecode(response.body) as List<dynamic>).map((item) {
+              final Widget? icon = item['password'] == '' ? null : IconButton(
+                icon: Icon(Icons.lock),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: item['password']));
+                },
+              );
+
               return ListTile(
+                leading: SizedBox(width: 40, child: icon),
                 title: Row(
                   children: <Widget>[
                     InkWell(
