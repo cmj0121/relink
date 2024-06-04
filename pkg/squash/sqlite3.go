@@ -82,7 +82,7 @@ func (s *SQLite) List(ctx context.Context) <-chan *types.Record {
 		defer s.mu.RUnlock()
 		defer close(ch)
 
-		rows, err := s.db.Query("SELECT key, value, creator_ip, created_at, password FROM relink")
+		rows, err := s.db.Query("SELECT key, value, creator_ip, created_at, password FROM relink ORDER BY created_at DESC")
 		if err != nil {
 			log.Warn().Err(err).Msg("failed to list the records")
 			return
