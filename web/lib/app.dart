@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:html' as html;
 
 import 'components.dart';
+import 'icons.dart';
 
 enum Routes {
   pageIndex,
@@ -87,11 +88,11 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
         backgroundColor: const Color(0xFFCFCFE9),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.home),
+            icon: Icon(RecordIcon.home.icon),
             onPressed: () { routeTo(Routes.pageIndex, context); },
           ),
           IconButton(
-            icon: Icon(Icons.admin_panel_settings),
+            icon: Icon(RecordIcon.admin_panel.icon),
             onPressed: () { routeTo(Routes.pageAdminList, context); },
           ),
         ],
@@ -152,9 +153,9 @@ class _SquashLinkState extends State<SquashLink> {
     return TextField(
       controller: _textController,
       decoration: InputDecoration(
-        prefixIcon: Icon(Icons.arrow_forward_ios_outlined),
+        prefixIcon: Icon(RecordIcon.link.icon),
         suffixIcon: IconButton(
-          icon: Icon(Icons.menu),
+          icon: Icon(RecordIcon.menu.icon),
           onPressed: () {
             setState(() {
               showMenu = !showMenu;
@@ -179,7 +180,7 @@ class _SquashLinkState extends State<SquashLink> {
             controller: _passwordController,
             maxLength: 32,
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.lock),
+              prefixIcon: Icon(RecordIcon.lock.icon),
               hintText: AppLocalizations.of(context)?.txt_password,
             ),
           ),
@@ -197,7 +198,7 @@ class _SquashLinkState extends State<SquashLink> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.copy),
+              icon: Icon(RecordIcon.copy.icon),
               onPressed: _squashedLink == null ? null : copyLink,
             ),
             SizedBox(width: 10),
@@ -292,7 +293,7 @@ class _SquashListState extends State<SquashList> {
             children: (jsonDecode(response.body) as List<dynamic>).map((item) {
               final String password = item['password'];
               final Widget passwordIcon = IconButton(
-                icon: Icon(Icons.lock),
+                icon: Icon(RecordIcon.lock.icon),
                 onPressed: password.isEmpty ? null : () {
                   Clipboard.setData(ClipboardData(text: password));
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -311,15 +312,13 @@ class _SquashListState extends State<SquashList> {
                   ),
                   title: Row(
                     children: <Widget>[
-                      Icon(Icons.link),
-                      SizedBox(width: 10),
-                      InkWell(
-                        child: Text("${item['hashed']}"),
-                        onTap: () {
-                          html.window.location.href = '/${item['hashed']}';
+                      TextButton.icon(
+                        icon: Icon(RecordIcon.link.icon),
+                        label: Text("${item['hashed']}"),
+                        onPressed: () {
+                          html.window.location.href = '/need-password-${item['hashed']}';
                         },
                       ),
-                      Icon(Icons.arrow_back_outlined),
                       Text("${item['source']}", overflow: TextOverflow.ellipsis),
                     ],
                   ),
@@ -369,7 +368,7 @@ class _SquashListState extends State<SquashList> {
           TextField(
             controller: _textController,
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.key_sharp),
+              prefixIcon: Icon(RecordIcon.password.icon),
               hintText: AppLocalizations.of(context)?.txt_password,
             ),
             onSubmitted: (String password) => loadContent(),
@@ -401,7 +400,7 @@ class PasswordPage extends StatelessWidget {
             TextField(
               maxLength: 32,
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.lock),
+                prefixIcon: Icon(RecordIcon.lock.icon),
                 hintText: AppLocalizations.of(context)?.txt_password,
               ),
               onSubmitted: (password) {
