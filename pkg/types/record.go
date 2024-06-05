@@ -8,6 +8,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type RecordType string
+
+const (
+	LINK RecordType = "link"
+	TEXT RecordType = "text"
+)
+
 type Record struct {
 	Source string  `json:"source"`
 	Hashed string  `json:"hashed"`
@@ -15,7 +22,8 @@ type Record struct {
 	IP     *string `json:"ip"`
 
 	// The password to protect the link
-	Password *string `json:"password"`
+	Password *string    `json:"password"`
+	Type     RecordType `json:"type"`
 
 	// the timestamp mixed with the source
 	CreatedAt time.Time  `json:"created_at"`
@@ -29,6 +37,7 @@ func New(source, hashed, algo string) *Record {
 		Source:    source,
 		Hashed:    hashed,
 		Algo:      algo,
+		Type:      LINK,
 		CreatedAt: time.Now(),
 	}
 }
@@ -38,7 +47,7 @@ func NewFromRow(row *sql.Row) *Record {
 	var clientIP sql.NullString
 	var password sql.NullString
 
-	switch err := row.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt, &password); err {
+	switch err := row.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt, &password, &record.Type); err {
 	case nil:
 		record.IP = &clientIP.String
 		record.Password = &password.String
@@ -56,7 +65,7 @@ func NewFromRows(rows *sql.Rows) *Record {
 	var clientIP sql.NullString
 	var password sql.NullString
 
-	switch err := rows.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt, &password); err {
+	switch err := rows.Scan(&record.Hashed, &record.Source, &clientIP, &record.CreatedAt, &password, &record.Type); err {
 	case nil:
 		record.IP = &clientIP.String
 		record.Password = &password.String

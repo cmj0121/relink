@@ -40,13 +40,13 @@ func (s *SQLite) Save(record *types.Record) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	sql_stmt := "INSERT INTO relink (key, value, creator_ip, password) VALUES (?, ?, ?, ?)"
+	sql_stmt := "INSERT INTO relink (key, value, creator_ip, password, type) VALUES (?, ?, ?, ?, ?)"
 	password := sql.NullString{}
 	if record.Password != nil && *record.Password != "" {
 		password = sql.NullString{String: *record.Password, Valid: true}
 	}
 
-	_, err := s.db.Exec(sql_stmt, record.Hashed, record.Source, record.IP, password)
+	_, err := s.db.Exec(sql_stmt, record.Hashed, record.Source, record.IP, password, record.Type)
 	if err != nil {
 		log.Warn().Err(err).Str("record", record.String()).Msg("failed to save the key-value pair")
 		return err
@@ -60,7 +60,7 @@ func (s *SQLite) SearchSource(key string) *types.Record {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	row := s.db.QueryRow("SELECT key, value, creator_ip, created_at, password FROM relink WHERE key = ?", key)
+	row := s.db.QueryRow("SELECT key, value, creator_ip, created_at, password, type FROM relink WHERE key = ?", key)
 	return types.NewFromRow(row)
 }
 
@@ -69,7 +69,7 @@ func (s *SQLite) SearchHashed(value string) *types.Record {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	row := s.db.QueryRow("SELECT key, value, creator_ip, created_at, password FROM relink WHERE value = ?", value)
+	row := s.db.QueryRow("SELECT key, value, creator_ip, created_at, password, type FROM relink WHERE value = ?", value)
 	return types.NewFromRow(row)
 }
 
@@ -82,7 +82,7 @@ func (s *SQLite) List(ctx context.Context) <-chan *types.Record {
 		defer s.mu.RUnlock()
 		defer close(ch)
 
-		rows, err := s.db.Query("SELECT key, value, creator_ip, created_at, password FROM relink ORDER BY created_at DESC")
+		rows, err := s.db.Query("SELECT key, value, creator_ip, created_at, password, type FROM relink ORDER BY created_at DESC")
 		if err != nil {
 			log.Warn().Err(err).Msg("failed to list the records")
 			return
