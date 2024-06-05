@@ -303,7 +303,7 @@ class _SquashListState extends State<SquashList> {
               );
 
               return ListTile(
-                leading: SizedBox(width: 40, child: icon),
+                leading: SizedBox(width: 32, child: icon),
                 title: Row(
                   children: <Widget>[
                     InkWell(
