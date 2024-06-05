@@ -79,7 +79,7 @@ class ReLinkHomePage extends StatefulWidget {
 class _ReLinkHomePageState extends State<ReLinkHomePage> {
   @override
   Widget build(BuildContext context) {
-    final double width = 640.0;
+    const double width = 640.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -99,7 +99,7 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Container(
-            constraints: BoxConstraints(maxWidth: width),
+            constraints: const BoxConstraints(maxWidth: width),
             child: widget.child,
           ),
         ),
