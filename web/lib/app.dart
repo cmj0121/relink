@@ -97,7 +97,10 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
         ],
       ),
       body: Center(
-        child: widget.child,
+        child: Container(
+          padding: EdgeInsets.all(16),
+          child: widget.child,
+        ),
       ),
     );
   }
@@ -291,27 +294,34 @@ class _SquashListState extends State<SquashList> {
                 icon: Icon(Icons.lock),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: item['password']));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.txt_copied_password),
+                    ),
+                  );
                 },
               );
 
-              return ListTile(
-                leading: SizedBox(width: 40, child: icon),
-                title: Row(
-                  children: <Widget>[
-                    InkWell(
-                      child: Text("${item['hashed']}"),
-                      onTap: () {
-                        html.window.location.href = '/${item['hashed']}';
-                      },
-                    ),
-                    Icon(Icons.arrow_back_outlined),
-                    Text("${item['source']}", overflow: TextOverflow.ellipsis),
-                  ],
-                ),
-                subtitle: Text("${item['ip']}"),
-                trailing: Container(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Text("${item['created_at']}"),
+              return ClipRect(
+                child: ListTile(
+                  leading: SizedBox(width: 16, child: icon),
+                  title: Row(
+                    children: <Widget>[
+                      InkWell(
+                        child: Text("${item['hashed']}"),
+                        onTap: () {
+                          html.window.location.href = '/${item['hashed']}';
+                        },
+                      ),
+                      Icon(Icons.arrow_back_outlined),
+                      Text("${item['source']}", overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                  subtitle: Text("${item['ip']}"),
+                  trailing: Container(
+                    padding: EdgeInsets.only(top: 20),
+                    child: Text("${item['created_at']}"),
+                  ),
                 ),
               );
             }).toList(),

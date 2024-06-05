@@ -2,6 +2,7 @@
     "txt_password": "Secret password",
     "txt_search_hint": "Enter the URL you want to short ...",
     "txt_copied_to_clipboard": "Copied to clipboard: {_squashedLink}",
+    "txt_copied_password": "Copied the password",
     "txt_unauthorized": "Unauthorized",
     "txt_forbidden": "Forbidden",
     "txt_too_many_requests": "Too many requests",
