@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
-import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
 
 import 'components.dart';
 import 'icons.dart';
@@ -28,8 +27,8 @@ void routeTo(Routes route, BuildContext context) {
 }
 
 class ReLinkApp extends StatelessWidget {
-  static String title = "ReLink";
-  const ReLinkApp({Key? key});
+  static String title = 'ReLink';
+  const ReLinkApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +46,10 @@ class ReLinkApp extends StatelessWidget {
 
         switch (name) {
           case '/':
-            child = SquashLink();
+            child = const SquashLink();
             break;
           case '/_admin/list':
-            child = SquashList();
+            child = const SquashList();
             break;
           default:
             final match = RegExp(r'^/need-password-(\w+)');
@@ -74,7 +73,7 @@ class ReLinkApp extends StatelessWidget {
 class ReLinkHomePage extends StatefulWidget {
   final String title;
   final Widget child;
-  const ReLinkHomePage({Key? key, required this.title, required this.child});
+  const ReLinkHomePage({super.key, required this.title, required this.child});
 
   @override
   State<ReLinkHomePage> createState() => _ReLinkHomePageState();
@@ -92,14 +91,14 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
             onPressed: () { routeTo(Routes.pageIndex, context); },
           ),
           IconButton(
-            icon: Icon(RecordIcon.admin_panel.icon),
+            icon: Icon(RecordIcon.adminPanel.icon),
             onPressed: () { routeTo(Routes.pageAdminList, context); },
           ),
         ],
       ),
       body: Center(
         child: Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: widget.child,
         ),
       ),
@@ -110,7 +109,7 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
 class SquashLink extends StatefulWidget {
   final double maxWidth;
 
-  const SquashLink({Key? key, this.maxWidth=600}) : super(key: key);
+  const SquashLink({super.key, this.maxWidth=600});
 
   @override
   State<SquashLink> createState() => _SquashLinkState();
@@ -122,7 +121,7 @@ class _SquashLinkState extends State<SquashLink> {
   late bool showMenu = false;
 
   String? _squashedLink;
-  String? _squashedType = "link";
+  String? _squashedType = 'link';
 
   @override
   void dispose() {
@@ -139,10 +138,10 @@ class _SquashLinkState extends State<SquashLink> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             inputLinkField(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             optionFields(),
-            Loading(icon: Icons.keyboard_arrow_down_outlined),
-            SizedBox(height: 20),
+            const Loading(icon: Icons.keyboard_arrow_down_outlined),
+            const SizedBox(height: 20),
             squashLinkField(),
           ],
         ),
@@ -175,18 +174,18 @@ class _SquashLinkState extends State<SquashLink> {
       value: _squashedType,
       items: [
         DropdownMenuItem(
-          child: Icon(RecordIcon.link.icon),
           value: 'link',
+          child: Icon(RecordIcon.link.icon),
         ),
         DropdownMenuItem(
-          child: Icon(RecordIcon.text.icon),
           value: 'text',
           enabled: false,
+          child: Icon(RecordIcon.text.icon),
         ),
         DropdownMenuItem(
-          child: Icon(RecordIcon.image.icon),
           value: 'image',
           enabled: false,
+          child: Icon(RecordIcon.image.icon),
         ),
       ],
       onChanged: (String? value) {
@@ -199,7 +198,7 @@ class _SquashLinkState extends State<SquashLink> {
     if (!showMenu) return Container();
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 60),
+      padding: const EdgeInsets.symmetric(horizontal: 60),
       child: Column(
         children: [
           TextField(
@@ -210,7 +209,7 @@ class _SquashLinkState extends State<SquashLink> {
               hintText: AppLocalizations.of(context)?.txt_password,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -219,21 +218,19 @@ class _SquashLinkState extends State<SquashLink> {
   Widget squashLinkField() {
     return Opacity(
       opacity: _squashedLink == null ? 0.0 : 1.0,
-      child: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(RecordIcon.copy.icon),
-              onPressed: _squashedLink == null ? null : copyLink,
-            ),
-            SizedBox(width: 10),
-            Text(
-              _squashedLink ?? '',
-              style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
-            ),
-          ],
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          IconButton(
+            icon: Icon(RecordIcon.copy.icon),
+            onPressed: _squashedLink == null ? null : copyLink,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            _squashedLink ?? '',
+            style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
+          ),
+        ],
       ),
     );
   }
@@ -283,7 +280,7 @@ class _SquashLinkState extends State<SquashLink> {
 
 class SquashList extends StatefulWidget {
   final double maxWidth;
-  const SquashList({Key? key, this.maxWidth=600});
+  const SquashList({super.key, this.maxWidth=600});
 
   @override
   State<SquashList> createState() => _SquashListState();
@@ -291,7 +288,7 @@ class SquashList extends StatefulWidget {
 
 class _SquashListState extends State<SquashList> {
   final _textController = TextEditingController();
-  late Widget _content = CircularProgressIndicator();
+  late Widget _content = const CircularProgressIndicator();
 
   @override
   void initState() {
@@ -309,7 +306,7 @@ class _SquashListState extends State<SquashList> {
 
   void loadContent() async {
     final endpoint = Uri.parse('/api/squash');
-    final headers = {"Authorization": "${_textController.text}"};
+    final headers = {'Authorization': _textController.text};
     final response = await http.get(endpoint, headers: headers);
 
     setState(() {
@@ -350,7 +347,7 @@ class _SquashListState extends State<SquashList> {
                   ),
                   subtitle: Text("${item['ip']}"),
                   trailing: Container(
-                    padding: EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.only(top: 20),
                     child: Text("${item['created_at']}"),
                   ),
                 ),
@@ -369,8 +366,8 @@ class _SquashListState extends State<SquashList> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(AppLocalizations.of(context)!.txt_too_many_requests, style: TextStyle(fontSize: 32, color: Colors.red)),
-                SizedBox(height: 20),
+                Text(AppLocalizations.of(context)!.txt_too_many_requests, style: const TextStyle(fontSize: 32, color: Colors.red)),
+                const SizedBox(height: 20),
                 Text(AppLocalizations.of(context)!.txt_try_again_later),
               ],
             ),
@@ -389,8 +386,8 @@ class _SquashListState extends State<SquashList> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(text, style: TextStyle(fontSize: 32, color: Colors.red)),
-          SizedBox(height: 20),
+          Text(text, style: const TextStyle(fontSize: 32, color: Colors.red)),
+          const SizedBox(height: 20),
           TextField(
             controller: _textController,
             decoration: InputDecoration(
@@ -412,7 +409,7 @@ class PasswordPage extends StatelessWidget {
   final String? code;
   final double maxWidth;
 
-  const PasswordPage({Key? key, required this.code, this.maxWidth=600}) : super(key: key);
+  const PasswordPage({super.key, required this.code, this.maxWidth=600});
 
   @override
   Widget build(BuildContext context) {
@@ -430,7 +427,7 @@ class PasswordPage extends StatelessWidget {
                 hintText: AppLocalizations.of(context)?.txt_password,
               ),
               onSubmitted: (password) {
-                html.window.location.href = '/${code}?password=${password}';
+                html.window.location.href = '/$code?password=$password';
               },
             ),
           ],

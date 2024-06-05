@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class Loading extends StatefulWidget {
   final int size;
-  final duration;
+  final Duration duration;
   final IconData icon;
 
-  Loading({Key? key, required this.icon, this.size = 5, this.duration = const Duration(seconds: 1)}) : super(key: key);
+  const Loading({super.key, required this.icon, this.size = 5, this.duration = const Duration(seconds: 1)});
 
   @override
   State<Loading> createState() => _LoadingState();
