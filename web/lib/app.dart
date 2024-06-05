@@ -294,6 +294,11 @@ class _SquashListState extends State<SquashList> {
                 icon: Icon(Icons.lock),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: item['password']));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.txt_copied_password),
+                    ),
+                  );
                 },
               );
 
