@@ -302,24 +302,26 @@ class _SquashListState extends State<SquashList> {
                 },
               );
 
-              return ListTile(
-                leading: SizedBox(width: 32, child: icon),
-                title: Row(
-                  children: <Widget>[
-                    InkWell(
-                      child: Text("${item['hashed']}"),
-                      onTap: () {
-                        html.window.location.href = '/${item['hashed']}';
-                      },
-                    ),
-                    Icon(Icons.arrow_back_outlined),
-                    Text("${item['source']}", overflow: TextOverflow.ellipsis),
-                  ],
-                ),
-                subtitle: Text("${item['ip']}"),
-                trailing: Container(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Text("${item['created_at']}"),
+              return ClipRect(
+                child: ListTile(
+                  leading: SizedBox(width: 16, child: icon),
+                  title: Row(
+                    children: <Widget>[
+                      InkWell(
+                        child: Text("${item['hashed']}"),
+                        onTap: () {
+                          html.window.location.href = '/${item['hashed']}';
+                        },
+                      ),
+                      Icon(Icons.arrow_back_outlined),
+                      Text("${item['source']}", overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                  subtitle: Text("${item['ip']}"),
+                  trailing: Container(
+                    padding: EdgeInsets.only(top: 20),
+                    child: Text("${item['created_at']}"),
+                  ),
                 ),
               );
             }).toList(),
