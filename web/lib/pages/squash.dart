@@ -6,6 +6,10 @@ import 'package:http/http.dart' as http;
 
 import '../components/all.dart';
 
+enum SquashType {
+  link,
+}
+
 class SquashPage extends StatefulWidget {
   const SquashPage({super.key});
 
@@ -20,12 +24,12 @@ class _SquashPageState extends State<SquashPage> {
   late bool showMenu = false;
 
   String? _squashedLink;
-  String? _squashedType = 'link';
 
   @override
   void dispose() {
     _textController.dispose();
     _passwordController.dispose();
+
     super.dispose();
   }
 
@@ -52,7 +56,7 @@ class _SquashPageState extends State<SquashPage> {
       textInputAction: TextInputAction.go,
       onSubmitted: squashLink,
       decoration: InputDecoration(
-        prefixIcon: squashTypes(),
+        prefixIcon: Icon(RecordIcon.link.icon),
         suffixIcon: IconButton(
           icon: Icon(RecordIcon.menu.icon),
           onPressed: () {
@@ -63,35 +67,6 @@ class _SquashPageState extends State<SquashPage> {
         ),
         hintText: AppLocalizations.of(context)?.txt_search_hint,
       ),
-    );
-  }
-
-  Widget squashTypes() {
-    final items = [
-      DropdownMenuItem(
-        value: 'link',
-        child: Icon(RecordIcon.link.icon),
-      ),
-      DropdownMenuItem(
-        value: 'text',
-        enabled: false,
-        child: Icon(RecordIcon.text.icon),
-      ),
-      DropdownMenuItem(
-        value: 'image',
-        enabled: false,
-        child: Icon(RecordIcon.image.icon),
-      ),
-    ];
-
-    return DropdownButton(
-      value: _squashedType,
-      items: items,
-      onChanged: (String? value) {
-        setState(() {
-          _squashedType = value;
-        });
-      },
     );
   }
 

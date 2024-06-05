@@ -69,6 +69,7 @@ class ReLinkApp extends StatelessWidget {
 class ReLinkHomePage extends StatefulWidget {
   final String title;
   final Widget child;
+
   const ReLinkHomePage({super.key, required this.title, required this.child});
 
   @override
@@ -78,6 +79,8 @@ class ReLinkHomePage extends StatefulWidget {
 class _ReLinkHomePageState extends State<ReLinkHomePage> {
   @override
   Widget build(BuildContext context) {
+    final double width = 640.0;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFCFCFE9),
@@ -95,7 +98,10 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(16),
-          child: widget.child,
+          child: Container(
+            constraints: BoxConstraints(maxWidth: width),
+            child: widget.child,
+          ),
         ),
       ),
     );
