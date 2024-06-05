@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
-import 'package:universal_html/html.dart' as html;
 
 import 'components.dart';
 import 'icons.dart';
@@ -60,7 +59,7 @@ class ReLinkApp extends StatelessWidget {
             }
 
             final code = match.firstMatch(name)!.group(1);
-            child = PasswordPage(code: code);
+            child = PasswordPage(code);
         }
 
         return MaterialPageRoute(
@@ -276,38 +275,6 @@ class _SquashLinkState extends State<SquashLink> {
           break;
       }
     });
-  }
-}
-
-class PasswordPage extends StatelessWidget {
-  final String? code;
-  final double maxWidth;
-
-  const PasswordPage({super.key, required this.code, this.maxWidth=600});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(AppLocalizations.of(context)!.txt_need_password(code!)),
-            TextField(
-              maxLength: 32,
-              decoration: InputDecoration(
-                prefixIcon: Icon(RecordIcon.lock.icon),
-                hintText: AppLocalizations.of(context)?.txt_password,
-              ),
-              onSubmitted: (password) {
-                html.window.location.href = '/$code?password=$password';
-              },
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

@@ -10,7 +10,7 @@ test:			# run test
 	flutter analyze
 
 run:			# run in the local environment
-	flutter run -d chrome
+	flutter run -d chrome --web-browser-flag "--disable-web-security"
 
 build:			# build the binary/library
 	cp ../assets/logo.svg web/favicon.svg
