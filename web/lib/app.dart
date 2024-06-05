@@ -97,7 +97,10 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
         ],
       ),
       body: Center(
-        child: widget.child,
+        child: Container(
+          padding: EdgeInsets.all(16),
+          child: widget.child,
+        ),
       ),
     );
   }
