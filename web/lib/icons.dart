@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 enum RecordIcon {
   home,
-  admin_panel,
+  adminPanel,
   lock,
   menu,
   copy,
@@ -15,7 +15,7 @@ enum RecordIcon {
 extension RecordIconExtension on RecordIcon {
   static final values = {
     RecordIcon.home: Icons.home,
-    RecordIcon.admin_panel: Icons.admin_panel_settings,
+    RecordIcon.adminPanel: Icons.admin_panel_settings,
     RecordIcon.lock: Icons.lock,
     RecordIcon.menu: Icons.menu,
     RecordIcon.copy: Icons.copy,

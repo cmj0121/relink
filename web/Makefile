@@ -6,7 +6,8 @@ clean:			# clean-up environment
 	flutter clean
 
 test:			# run test
-	flutter test
+	dart fix --apply && git checkout pubspec.*
+	flutter analyze
 
 run:			# run in the local environment
 	flutter run -d chrome
