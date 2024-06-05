@@ -122,6 +122,7 @@ class _SquashLinkState extends State<SquashLink> {
   late bool showMenu = false;
 
   String? _squashedLink;
+  String? _squashedType = "link";
 
   @override
   void dispose() {
@@ -153,7 +154,7 @@ class _SquashLinkState extends State<SquashLink> {
     return TextField(
       controller: _textController,
       decoration: InputDecoration(
-        prefixIcon: Icon(RecordIcon.link.icon),
+        prefixIcon: squashTypes(),
         suffixIcon: IconButton(
           icon: Icon(RecordIcon.menu.icon),
           onPressed: () {
@@ -166,6 +167,31 @@ class _SquashLinkState extends State<SquashLink> {
       ),
       textInputAction: TextInputAction.go,
       onSubmitted: squashLink,
+    );
+  }
+
+  Widget squashTypes() {
+    return DropdownButton(
+      value: _squashedType,
+      items: [
+        DropdownMenuItem(
+          child: Icon(RecordIcon.link.icon),
+          value: 'link',
+        ),
+        DropdownMenuItem(
+          child: Icon(RecordIcon.text.icon),
+          value: 'text',
+          enabled: false,
+        ),
+        DropdownMenuItem(
+          child: Icon(RecordIcon.image.icon),
+          value: 'image',
+          enabled: false,
+        ),
+      ],
+      onChanged: (String? value) {
+        _squashedType = value;
+      },
     );
   }
 

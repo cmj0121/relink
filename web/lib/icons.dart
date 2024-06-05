@@ -7,6 +7,8 @@ enum RecordIcon {
   menu,
   copy,
   link,
+  text,
+  image,
   password,
 }
 
@@ -18,6 +20,8 @@ extension RecordIconExtension on RecordIcon {
     RecordIcon.menu: Icons.menu,
     RecordIcon.copy: Icons.copy,
     RecordIcon.link: Icons.keyboard_double_arrow_right_rounded,
+    RecordIcon.text: Icons.article_outlined,
+    RecordIcon.image: Icons.image_outlined,
     RecordIcon.password: Icons.key_sharp,
   };
 
