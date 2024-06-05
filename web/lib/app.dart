@@ -7,6 +7,7 @@ import 'package:universal_html/html.dart' as html;
 
 import 'components.dart';
 import 'icons.dart';
+import 'page.dart';
 
 enum Routes {
   pageIndex,
@@ -49,7 +50,7 @@ class ReLinkApp extends StatelessWidget {
             child = const SquashLink();
             break;
           case '/_admin/list':
-            child = const SquashList();
+            child = const AdminPage();
             break;
           default:
             final match = RegExp(r'^/need-password-(\w+)');
@@ -275,133 +276,6 @@ class _SquashLinkState extends State<SquashLink> {
           break;
       }
     });
-  }
-}
-
-class SquashList extends StatefulWidget {
-  final double maxWidth;
-  const SquashList({super.key, this.maxWidth=600});
-
-  @override
-  State<SquashList> createState() => _SquashListState();
-}
-
-class _SquashListState extends State<SquashList> {
-  final _textController = TextEditingController();
-  late Widget _content = const CircularProgressIndicator();
-
-  @override
-  void initState() {
-    super.initState();
-    loadContent();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(maxWidth: widget.maxWidth),
-      child: _content,
-    );
-  }
-
-  void loadContent() async {
-    final endpoint = Uri.parse('/api/squash');
-    final headers = {'Authorization': _textController.text};
-    final response = await http.get(endpoint, headers: headers);
-
-    setState(() {
-      switch (response.statusCode) {
-        case 200:
-          _content = ListView(
-            children: (jsonDecode(response.body) as List<dynamic>).map((item) {
-              final String password = item['password'];
-              final Widget passwordIcon = IconButton(
-                icon: Icon(RecordIcon.lock.icon),
-                onPressed: password.isEmpty ? null : () {
-                  Clipboard.setData(ClipboardData(text: password));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(AppLocalizations.of(context)!.txt_copied_password),
-                    ),
-                  );
-                },
-              );
-
-              return ClipRect(
-                child: ListTile(
-                  leading: Opacity(
-                    opacity: password.isEmpty ? 0.0 : 1.0,
-                    child: passwordIcon,
-                  ),
-                  title: Row(
-                    children: <Widget>[
-                      TextButton.icon(
-                        icon: Icon(RecordIcon.link.icon),
-                        label: Text("${item['hashed']}"),
-                        onPressed: () {
-                          html.window.location.href = '/need-password-${item['hashed']}';
-                        },
-                      ),
-                      Text("${item['source']}", overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                  subtitle: Text("${item['ip']}"),
-                  trailing: Container(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Text("${item['created_at']}"),
-                  ),
-                ),
-              );
-            }).toList(),
-          );
-          break;
-        case 401:
-          _content = buildSignin(AppLocalizations.of(context)!.txt_unauthorized);
-          break;
-        case 403:
-          _content = buildSignin(AppLocalizations.of(context)!.txt_forbidden);
-          break;
-        case 429:
-          _content = Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(AppLocalizations.of(context)!.txt_too_many_requests, style: const TextStyle(fontSize: 32, color: Colors.red)),
-                const SizedBox(height: 20),
-                Text(AppLocalizations.of(context)!.txt_try_again_later),
-              ],
-            ),
-          );
-          break;
-        default:
-          _content = buildSignin(AppLocalizations.of(context)!.txt_unknown_error);
-          break;
-      }
-    });
-  }
-
-  Widget buildSignin(String text) {
-    return Container(
-      constraints: BoxConstraints(maxWidth: widget.maxWidth),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(text, style: const TextStyle(fontSize: 32, color: Colors.red)),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _textController,
-            decoration: InputDecoration(
-              prefixIcon: Icon(RecordIcon.password.icon),
-              hintText: AppLocalizations.of(context)?.txt_password,
-            ),
-            onSubmitted: (String password) => loadContent(),
-            obscureText: true,
-            autocorrect: false,
-            enableSuggestions: false,
-          ),
-        ],
-      ),
-    );
   }
 }
 
