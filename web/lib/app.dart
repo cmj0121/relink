@@ -290,10 +290,11 @@ class _SquashListState extends State<SquashList> {
         case 200:
           _content = ListView(
             children: (jsonDecode(response.body) as List<dynamic>).map((item) {
-              final Widget? icon = item['password'] == '' ? null : IconButton(
+              final String password = item['password'];
+              final Widget passwordIcon = IconButton(
                 icon: Icon(Icons.lock),
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: item['password']));
+                onPressed: password.isEmpty ? null : () {
+                  Clipboard.setData(ClipboardData(text: password));
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(AppLocalizations.of(context)!.txt_copied_password),
@@ -304,9 +305,14 @@ class _SquashListState extends State<SquashList> {
 
               return ClipRect(
                 child: ListTile(
-                  leading: SizedBox(width: 16, child: icon),
+                  leading: Opacity(
+                    opacity: password.isEmpty ? 0.0 : 1.0,
+                    child: passwordIcon,
+                  ),
                   title: Row(
                     children: <Widget>[
+                      Icon(Icons.link),
+                      SizedBox(width: 10),
                       InkWell(
                         child: Text("${item['hashed']}"),
                         onTap: () {
