@@ -1,5 +1,6 @@
 {
     "txt_password": "密碼",
+    "txt_password_hint": "密碼提示",
     "txt_search_hint": "輸入你要縮短的網址 ...",
     "txt_copied_to_clipboard": "已複製到剪貼簿: {_squashedLink}",
     "txt_copied_password": "已複製密碼",

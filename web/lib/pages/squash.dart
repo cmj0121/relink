@@ -24,6 +24,7 @@ class _SquashPageState extends State<SquashPage> {
   late bool showMenu = false;
 
   String? _squashedLink;
+  final SquashType _squashType = SquashType.link;
 
   @override
   void dispose() {
@@ -39,53 +40,10 @@ class _SquashPageState extends State<SquashPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          inputLinkField(),
-          const SizedBox(height: 20),
-          optionFields(),
+          SquashMenu(_squashType),
           const Loading(icon: Icons.keyboard_arrow_down_outlined),
           const SizedBox(height: 20),
           squashLinkField(),
-        ],
-      ),
-    );
-  }
-
-  Widget inputLinkField() {
-    return TextField(
-      controller: _textController,
-      textInputAction: TextInputAction.go,
-      onSubmitted: squashLink,
-      decoration: InputDecoration(
-        prefixIcon: Icon(RecordIcon.link.icon),
-        suffixIcon: IconButton(
-          icon: Icon(RecordIcon.menu.icon),
-          onPressed: () {
-            setState(() {
-              showMenu = !showMenu;
-            });
-          },
-        ),
-        hintText: AppLocalizations.of(context)?.txt_search_hint,
-      ),
-    );
-  }
-
-  Widget optionFields() {
-    if (!showMenu) return Container();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 60),
-      child: Column(
-        children: [
-          TextField(
-            controller: _passwordController,
-            maxLength: 32,
-            decoration: InputDecoration(
-              prefixIcon: Icon(RecordIcon.lock.icon),
-              hintText: AppLocalizations.of(context)?.txt_password,
-            ),
-          ),
-          const SizedBox(height: 20),
         ],
       ),
     );
@@ -151,6 +109,77 @@ class _SquashPageState extends State<SquashPage> {
           break;
       }
     });
+  }
+}
+
+class SquashMenu extends StatefulWidget {
+  final SquashType type;
+  final ValueChanged<String>? onSquash;
+
+  const SquashMenu(this.type, {super.key, this.onSquash});
+
+  @override
+  State<SquashMenu> createState() => _SquashMenuState();
+}
+
+class _SquashMenuState extends State<SquashMenu> {
+  final _textController = TextEditingController();
+
+  late bool showMenu = false;
+
+  @override
+  void dispose() {
+    _textController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        linkField(),
+        const SizedBox(height: 20),
+        optionFields(),
+      ],
+    );
+  }
+
+  Widget linkField() {
+    return TextField(
+      controller: _textController,
+      onSubmitted: widget.onSquash,
+      textInputAction: TextInputAction.go,
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context)?.txt_search_hint,
+        prefixIcon: IconButton(
+          icon: Icon(RecordIcon.menu.icon),
+          onPressed: () {
+            setState(() {
+              showMenu = !showMenu;
+            });
+          },
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(RecordIcon.link.icon),
+          onPressed: () {
+            if (widget.onSquash != null) widget.onSquash!(_textController.text);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget optionFields() {
+    if (!showMenu) return Container();
+
+    return Column(
+      children: [
+        Password(),
+        const SizedBox(height: 20),
+      ],
+    );
   }
 }
 
