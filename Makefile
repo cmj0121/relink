@@ -12,7 +12,8 @@ all: $(SUBDIR) 		# default action
 clean: $(SUBDIR)	# clean-up environment
 	@find . -name '*.sw[po]' -delete
 
-test:				# run test
+test: $(SUBDIR)		# run test
+	$(MAKE) -C $(SUBDIR) build
 	go test ./...
 
 run:				# run in the local environment

@@ -10,7 +10,7 @@ COPY assets/logo.svg web/favicon.svg
 RUN flutter pub get
 
 COPY web .
-RUN flutter build web --release --base-href /_/
+RUN flutter build web --release
 
 #######################
 ## The builder image ##

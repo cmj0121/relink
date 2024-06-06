@@ -10,8 +10,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var (
+	fileHandler http.Handler
+)
+
 // The global interface to register the routes.
 func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
+	fs, _ := fs.Sub(view, "web/build/web")
+	fileHandler = http.FileServer(http.FS(fs))
+
 	// register the route for the health check
 	r.Any("/:squash", s.routeSolveSquash)
 	r.POST("/api/squash", s.routeGenerateSquash)
@@ -23,11 +30,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 	}
 
 	// serve the static files
-	fs, _ := fs.Sub(view, "web/build/web")
-	r.StaticFS("/_", http.FS(fs))
-	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusTemporaryRedirect, "/_/index.html")
-	})
+	r.NoRoute(s.routeStatic)
 }
 
 // Solve the squash link and redirect to the original link.
@@ -37,12 +40,12 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 	record := s.Squash.Storage.SearchSource(squashed)
 
 	if record == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		s.routeStatic(c)
 	} else if record.Password == nil || c.Query("password") == *record.Password {
 		// use HTTP 307 to redirect to the original link to keep the original method
 		c.Redirect(http.StatusTemporaryRedirect, record.Source)
 	} else {
-		link := fmt.Sprintf("/_/#/need-password-%v", squashed)
+		link := fmt.Sprintf("/#/need-password-%v", squashed)
 		c.Redirect(http.StatusTemporaryRedirect, link)
 	}
 }
@@ -83,4 +86,9 @@ func (s *Server) routeListSquash(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, records)
+}
+
+// Serve the static web UI
+func (s *Server) routeStatic(c *gin.Context) {
+	fileHandler.ServeHTTP(c.Writer, c.Request)
 }

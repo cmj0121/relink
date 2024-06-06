@@ -78,7 +78,7 @@ class Relink extends StatelessWidget {
           icon: Icon(RecordIcon.link.icon),
           label: Text(relink.hashed),
           onPressed: () {
-            html.window.location.href = '/need-password-${relink.hashed}';
+            html.window.location.href = '/${relink.hashed}';
           },
         ),
         Text(relink.source, overflow: TextOverflow.ellipsis),
