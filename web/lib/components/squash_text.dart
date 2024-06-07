@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'squash_base.dart';
 
-class SquashLink extends StatefulWidget {
-  const SquashLink({super.key});
+class SquashText extends StatefulWidget {
+  const SquashText({super.key});
 
   @override
-  State<SquashLink> createState() => _SquashLinkState();
+  State<SquashText> createState() => _SquashTextState();
 }
 
-class _SquashLinkState extends State<SquashLink> {
+class _SquashTextState extends State<SquashText> {
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _hintController = TextEditingController();
@@ -36,12 +35,28 @@ class _SquashLinkState extends State<SquashLink> {
   }
 
   Widget buildContent() {
-    return TextField(
-      controller: _controller,
-      onSubmitted: (value) => squash(),
-      textInputAction: TextInputAction.go,
-      decoration: InputDecoration(
-        hintText: AppLocalizations.of(context)?.txt_search_hint,
+    return Row(
+      children: [
+        Flexible(child: textField()),
+        IconButton(
+          icon: const Icon(Icons.send),
+          onPressed: () => squash(),
+        ),
+      ],
+    );
+  }
+
+  Widget textField() {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 160),
+      child: TextField(
+        controller: _controller,
+        minLines: 5,
+        maxLines: null,
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+        ),
+        onSubmitted: (value) => squash(),
       ),
     );
   }

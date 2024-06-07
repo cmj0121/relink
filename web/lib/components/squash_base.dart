@@ -44,22 +44,21 @@ class _SquashBaseState extends State<SquashBase> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Flexible(
-          child: Row(
+        widget.child,
+        Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               IconButton(
                 icon: Icon(RecordIcon.menu.icon),
                 onPressed: () => setState(() => _showMenu = !_showMenu),
               ),
               const SizedBox(width: 10),
-              Flexible(child: widget.child),
+              Flexible(child: optionFields()),
             ],
           ),
-        ),
-        optionFields(),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         const Loading(icon: Icons.keyboard_arrow_down_outlined),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         squashLinkField(),
       ],
     );
@@ -72,7 +71,7 @@ class _SquashBaseState extends State<SquashBase> {
         children: [
           LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
-              if (constraints.maxWidth < 600) {
+              if (constraints.maxWidth < 400) {
                 return const Column(
                   children: [
                     Password(),

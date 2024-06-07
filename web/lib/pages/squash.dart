@@ -111,7 +111,7 @@ class _SquashState extends State<Squash>  with SingleTickerProviderStateMixin {
         case SquashTab.link:
           return const SquashLink();
         case SquashTab.text:
-          return workInProgress();
+          return const SquashText();
         case SquashTab.image:
           return workInProgress();
         case SquashTab.video:

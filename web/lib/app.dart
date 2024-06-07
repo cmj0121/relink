@@ -95,12 +95,14 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
           ),
         ],
       ),
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16),
+      body: SafeArea(
+        child: Center(
           child: Container(
-            constraints: const BoxConstraints(maxWidth: width),
-            child: widget.child,
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: width),
+              child: widget.child,
+            ),
           ),
         ),
       ),
