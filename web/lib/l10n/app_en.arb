@@ -10,5 +10,6 @@
     "txt_try_again_later": "Try again later ...",
     "txt_need_password": "Access {code} need password ...",
     "txt_unknown_error": "Unkonwn Error",
+    "txt_unlimited": "Unlimited",
     "err_invalid_url": "Invalid URL: {url}"
 }

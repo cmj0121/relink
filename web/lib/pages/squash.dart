@@ -124,12 +124,18 @@ class SquashMenu extends StatefulWidget {
 
 class _SquashMenuState extends State<SquashMenu> {
   final _textController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _hintController = TextEditingController();
+  final _expiredController = TextEditingController();
 
   late bool showMenu = false;
 
   @override
   void dispose() {
     _textController.dispose();
+    _passwordController.dispose();
+    _hintController.dispose();
+    _expiredController.dispose();
 
     super.dispose();
   }
@@ -154,7 +160,7 @@ class _SquashMenuState extends State<SquashMenu> {
       decoration: InputDecoration(
         hintText: AppLocalizations.of(context)?.txt_search_hint,
         prefixIcon: IconButton(
-          icon: Icon(RecordIcon.menu.icon),
+          icon: Icon(RecordIcon.settings.icon),
           onPressed: () {
             setState(() {
               showMenu = !showMenu;
@@ -176,7 +182,28 @@ class _SquashMenuState extends State<SquashMenu> {
 
     return Column(
       children: [
-        Password(),
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            if (constraints.maxWidth < 600) {
+              return const Column(
+                children: [
+                  Password(),
+                  SizedBox(height: 10),
+                  TimePicker(),
+                ],
+              );
+            }
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(flex: 2, child: Password(textController: _passwordController, hintController: _hintController)),
+                const SizedBox(width: 20),
+                Flexible(flex: 1, child: TimePicker(controller: _expiredController)),
+              ],
+            );
+          },
+        ),
         const SizedBox(height: 20),
       ],
     );

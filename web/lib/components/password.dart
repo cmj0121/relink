@@ -5,28 +5,16 @@ import 'icons.dart';
 
 class Password extends StatefulWidget {
   final int maxLength;
-  final _textController = TextEditingController();
-  final _hintController = TextEditingController();
+  final TextEditingController? textController;
+  final TextEditingController? hintController;
 
-  Password({super.key, this.maxLength = 16});
+  const Password({super.key, this.maxLength = 16, this.textController, this.hintController});
 
   @override
   State<Password> createState() => _PasswordState();
-
-  get password => _textController.text;
-  get hint => _hintController.text;
 }
 
 class _PasswordState extends State<Password> {
-
-  @override
-  void dispose() {
-    widget._textController.clear();
-    widget._hintController.clear();
-
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -40,19 +28,27 @@ class _PasswordState extends State<Password> {
 
   Widget passwordField() {
     return TextField(
-      controller: widget._textController,
+      controller: widget.textController,
       maxLength: widget.maxLength,
       decoration: InputDecoration(
         prefixIcon: Icon(RecordIcon.lock.icon),
         hintText: AppLocalizations.of(context)?.txt_password,
         counterText: '',
       ),
+      onChanged: (value) {
+        setState(() {
+          if (value.isEmpty) {
+            widget.hintController?.clear();
+          }
+        });
+      },
     );
   }
 
   Widget passwordHint() {
     return TextField(
-      controller: widget._hintController,
+      enabled: widget.textController?.text.isNotEmpty ?? true,
+      controller: widget.hintController,
       maxLength: widget.maxLength,
       decoration: InputDecoration(
         prefixIcon: Icon(RecordIcon.hint.icon),

@@ -11,6 +11,7 @@ enum RecordIcon {
   text,
   image,
   password,
+  settings,
 }
 
 extension RecordIconExtension on RecordIcon {
@@ -25,6 +26,7 @@ extension RecordIconExtension on RecordIcon {
     RecordIcon.text: Icons.article_outlined,
     RecordIcon.image: Icons.image_outlined,
     RecordIcon.password: Icons.key_sharp,
+    RecordIcon.settings: Icons.settings,
   };
 
   IconData get icon => values[this]!;

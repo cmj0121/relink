@@ -10,5 +10,6 @@
     "txt_try_again_later": "請稍後再嘗試 ...",
     "txt_need_password": "輸入密碼來存取 {code} ...",
     "txt_unknown_error": "不明錯誤",
+    "txt_unlimited": "沒有限制",
     "err_invalid_url": "不合法的連結: {url}"
 }
