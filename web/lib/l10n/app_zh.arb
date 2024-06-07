@@ -18,6 +18,8 @@
     "txt_need_password": "輸入密碼來存取 {code} ...",
     "txt_unknown_error": "不明錯誤",
     "txt_unlimited": "沒有限制",
+    "txt_n_hour": "{hour} 小時",
+    "txt_n_day": "{hour} 天",
     "txt_work_in_progress": "施工中 ...",
     "txt_select_or_drop_image": "選擇或拖放圖片 ...",
     "err_invalid_url": "不合法的連結: {url}"

@@ -18,6 +18,8 @@
     "txt_need_password": "Access {code} need password ...",
     "txt_unknown_error": "Unkonwn Error",
     "txt_unlimited": "Unlimited",
+    "txt_n_hour": "{hour} hour(s)",
+    "txt_n_day": "{hour} day(s)",
     "txt_work_in_progress": "Work in process ...",
     "txt_select_or_drop_image": "Select or Drop Image ...",
     "err_invalid_url": "Invalid URL: {url}"
