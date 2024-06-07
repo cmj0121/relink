@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../components/all.dart';
@@ -92,9 +91,6 @@ class _SquashState extends State<Squash>  with SingleTickerProviderStateMixin {
           menuBar(),
           const SizedBox(height: 20),
           Flexible(child: squashBody()),
-          // const Loading(icon: Icons.keyboard_arrow_down_outlined),
-          // const SizedBox(height: 20),
-          // squashLinkField(),
         ],
       ),
     );
@@ -113,7 +109,7 @@ class _SquashState extends State<Squash>  with SingleTickerProviderStateMixin {
     final views = _tabs.map((tab) {
       switch (tab) {
         case SquashTab.link:
-          return workInProgress();
+          return const SquashLink();
         case SquashTab.text:
           return workInProgress();
         case SquashTab.image:
@@ -147,39 +143,6 @@ class _SquashState extends State<Squash>  with SingleTickerProviderStateMixin {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget squashLinkField() {
-    final String squashedLink = _controller.text;
-
-    return Opacity(
-      opacity: squashedLink.isEmpty ? 0.0 : 1.0,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(RecordIcon.copy.icon),
-            onPressed: squashedLink.isEmpty ? null : copyLink,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            squashedLink,
-            style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void copyLink() {
-    final String squashedLink = _controller.text;
-
-    Clipboard.setData(ClipboardData(text: squashedLink));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.txt_copied_to_clipboard(squashedLink)),
       ),
     );
   }
