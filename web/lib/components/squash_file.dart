@@ -1,0 +1,96 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:web/web.dart' as web;
+
+import 'squash_base.dart';
+
+class SquashFile extends StatefulWidget {
+  final String text;
+  final List<String>? mime;
+  final TextEditingController? controller;
+
+  const SquashFile({super.key, required this.text, this.mime, this.controller});
+
+  @override
+  State<SquashFile> createState() => _SquashFileState();
+}
+
+class _SquashFileState extends State<SquashFile> {
+  late final DropzoneViewController _controller;
+
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _hintController = TextEditingController();
+  final TextEditingController _expiredController = TextEditingController();
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _hintController.dispose();
+    _expiredController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SquashBase(
+      passwordController: _passwordController,
+      hintController: _hintController,
+      expiredController: _expiredController,
+      child: buildContent(),
+    );
+  }
+
+  Widget buildContent() {
+    return ClipRRect(
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
+      child: buildZone(),
+    );
+  }
+
+  Widget buildZone() {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 160),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.red),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+      ),
+      child: Stack(
+        children: [
+          dropZone(),
+          Center(
+            child: InkWell(
+              child: Text(widget.text, style: const TextStyle(fontSize: 24)),
+              onTap: () async {
+                final files = await _controller.pickFiles(multiple: false, mime: widget.mime ?? const []);
+                final file = files.first;
+                final link = await _controller.createFileUrl(file);
+
+                setState(() {
+                  widget.controller?.text = link;
+                });
+              }
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget dropZone() {
+    return DropzoneView(
+      onCreated: (ctrl) => _controller = ctrl,
+      onDrop: (dynamic ev) async{
+        if (ev is web.File) {
+          final file = ev;
+          final link = await _controller.createFileUrl(file);
+
+          setState(() {
+            widget.controller?.text = link;
+          });
+        }
+      }
+    );
+  }
+}
+
+// vim: set ts=2 sw=2 expandtab:

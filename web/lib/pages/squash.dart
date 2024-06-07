@@ -113,9 +113,11 @@ class _SquashState extends State<Squash>  with SingleTickerProviderStateMixin {
         case SquashTab.text:
           return const SquashText();
         case SquashTab.image:
-          return workInProgress();
+          final List<String> mime = ['image/jpeg', 'image/png', 'image/gif'];
+          return SquashFile(text: 'Image', mime: mime);
         case SquashTab.video:
-          return workInProgress();
+          final List<String> mime = ['video/mp4', 'video/quicktime'];
+          return SquashFile(text: 'Video', mime: mime);
       }
     }).toList();
 
