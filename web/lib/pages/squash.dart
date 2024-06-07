@@ -7,7 +7,6 @@ enum SquashTab {
   link,
   text,
   image,
-  video,
 }
 
 extension SquashTypeExtension on SquashTab {
@@ -25,9 +24,6 @@ extension SquashTypeExtension on SquashTab {
       case SquashTab.image:
         text = AppLocalizations.of(context)!.tab_image;
         icon = Icon(RecordIcon.image.icon);
-      case SquashTab.video:
-        text = AppLocalizations.of(context)!.tab_video;
-        icon = Icon(RecordIcon.video.icon);
     }
 
     return LayoutBuilder(
@@ -113,11 +109,7 @@ class _SquashState extends State<Squash>  with SingleTickerProviderStateMixin {
         case SquashTab.text:
           return const SquashText();
         case SquashTab.image:
-          final List<String> mime = ['image/jpeg', 'image/png', 'image/gif'];
-          return SquashFile(text: 'Image', mime: mime);
-        case SquashTab.video:
-          final List<String> mime = ['video/mp4', 'video/quicktime'];
-          return SquashFile(text: 'Video', mime: mime);
+          return const SquashImage();
       }
     }).toList();
 

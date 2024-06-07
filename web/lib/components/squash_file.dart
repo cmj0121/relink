@@ -8,8 +8,9 @@ class SquashFile extends StatefulWidget {
   final String text;
   final List<String>? mime;
   final TextEditingController? controller;
+  final VoidCallback? onLoaded;
 
-  const SquashFile({super.key, required this.text, this.mime, this.controller});
+  const SquashFile({super.key, required this.text, this.mime, this.controller, this.onLoaded});
 
   @override
   State<SquashFile> createState() => _SquashFileState();
@@ -42,7 +43,6 @@ class _SquashFileState extends State<SquashFile> {
 
   Widget buildContent() {
     return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(12)),
       child: buildZone(),
     );
   }
@@ -50,10 +50,6 @@ class _SquashFileState extends State<SquashFile> {
   Widget buildZone() {
     return Container(
       constraints: const BoxConstraints(maxHeight: 160),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.red),
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
-      ),
       child: Stack(
         children: [
           dropZone(),
@@ -65,9 +61,8 @@ class _SquashFileState extends State<SquashFile> {
                 final file = files.first;
                 final link = await _controller.createFileUrl(file);
 
-                setState(() {
-                  widget.controller?.text = link;
-                });
+                widget.controller?.text = link;
+                widget.onLoaded?.call();
               }
             ),
           ),
@@ -84,9 +79,8 @@ class _SquashFileState extends State<SquashFile> {
           final file = ev;
           final link = await _controller.createFileUrl(file);
 
-          setState(() {
-            widget.controller?.text = link;
-          });
+          widget.controller?.text = link;
+          widget.onLoaded?.call();
         }
       }
     );
