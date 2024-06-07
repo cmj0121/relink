@@ -1,4 +1,8 @@
 {
+    "tab_link": "連結",
+    "tab_text": "文字",
+    "tab_image": "圖片",
+    "tab_video": "影片",
     "txt_password": "密碼",
     "txt_password_hint": "密碼提示",
     "txt_search_hint": "輸入你要縮短的網址 ...",
@@ -11,5 +15,6 @@
     "txt_need_password": "輸入密碼來存取 {code} ...",
     "txt_unknown_error": "不明錯誤",
     "txt_unlimited": "沒有限制",
+    "txt_work_in_progress": "施工中 ...",
     "err_invalid_url": "不合法的連結: {url}"
 }

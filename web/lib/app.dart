@@ -42,7 +42,7 @@ class ReLinkApp extends StatelessWidget {
 
         switch (name) {
           case '/':
-            child = const SquashPage();
+            child = const Squash();
             break;
           case '/_admin/list':
             child = const AdminPage();

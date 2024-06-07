@@ -10,8 +10,10 @@ enum RecordIcon {
   link,
   text,
   image,
+  video,
   password,
   settings,
+  workInProgress,
 }
 
 extension RecordIconExtension on RecordIcon {
@@ -25,8 +27,10 @@ extension RecordIconExtension on RecordIcon {
     RecordIcon.link: Icons.keyboard_double_arrow_right_rounded,
     RecordIcon.text: Icons.article_outlined,
     RecordIcon.image: Icons.image_outlined,
+    RecordIcon.video: Icons.video_collection_outlined,
     RecordIcon.password: Icons.key_sharp,
     RecordIcon.settings: Icons.settings,
+    RecordIcon.workInProgress: Icons.build_sharp,
   };
 
   IconData get icon => values[this]!;
