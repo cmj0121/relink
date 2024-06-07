@@ -8,7 +8,7 @@ class Password extends StatefulWidget {
   final _textController = TextEditingController();
   final _hintController = TextEditingController();
 
-  Password({super.key, this.maxLength = 32});
+  Password({super.key, this.maxLength = 16});
 
   @override
   State<Password> createState() => _PasswordState();
@@ -45,6 +45,7 @@ class _PasswordState extends State<Password> {
       decoration: InputDecoration(
         prefixIcon: Icon(RecordIcon.lock.icon),
         hintText: AppLocalizations.of(context)?.txt_password,
+        counterText: '',
       ),
     );
   }
@@ -56,6 +57,7 @@ class _PasswordState extends State<Password> {
       decoration: InputDecoration(
         prefixIcon: Icon(RecordIcon.hint.icon),
         hintText: AppLocalizations.of(context)?.txt_password_hint,
+        counterText: '',
       ),
     );
   }
