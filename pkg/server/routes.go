@@ -96,19 +96,22 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 	}
 	if relink.Load(s.Conn.DB) && relink.DeletedAt == nil {
 		// the record is already exist
-		c.JSON(http.StatusCreated, relink.Key)
+		link := fmt.Sprintf("%v/%v", s.BaseURL, relink.Key)
+		c.JSON(http.StatusCreated, link)
 		return
 	}
 
 	for size := s.MinSize; size <= s.MaxSize; size++ {
 		relink.Key = s.randomString(size)
 
+		log.Debug().Interface("relink", relink).Msg("try to save the record")
 		if err := relink.Insert(s.Conn.DB); err != nil {
 			log.Info().Err(err).Msg("failed to save the record")
 			continue
 		}
 
-		c.JSON(http.StatusCreated, relink.Key)
+		link := fmt.Sprintf("%v/%v", s.BaseURL, relink.Key)
+		c.JSON(http.StatusCreated, link)
 		return
 	}
 

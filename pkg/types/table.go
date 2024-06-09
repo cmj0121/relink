@@ -37,14 +37,18 @@ type Relink struct {
 func RelinkFromRows(rows *sql.Rows) *Relink {
 	var relink Relink
 
+	var password sql.NullString
+	var hint sql.NullString
 	var link sql.NullString
 	var text sql.NullString
 	var image sql.NullString
 	var mime sql.NullString
 	var deletedAt sql.NullTime
 
-	switch err := rows.Scan(&relink.Key, &relink.Type, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt); err {
+	switch err := rows.Scan(&relink.Key, &relink.Type, &password, &hint, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt); err {
 	case nil:
+		relink.Password = &password.String
+		relink.PwdHint = &hint.String
 		relink.Link = &link.String
 		relink.Text = &text.String
 		relink.Image = &image.String
@@ -63,14 +67,18 @@ func RelinkFromRows(rows *sql.Rows) *Relink {
 func RelinkFromRow(rows *sql.Row) *Relink {
 	var relink Relink
 
+	var password sql.NullString
+	var hint sql.NullString
 	var link sql.NullString
 	var text sql.NullString
 	var image sql.NullString
 	var mime sql.NullString
 	var deletedAt sql.NullTime
 
-	switch err := rows.Scan(&relink.Key, &relink.Type, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt); err {
+	switch err := rows.Scan(&relink.Key, &relink.Type, &password, &hint, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt); err {
 	case nil:
+		relink.Password = &password.String
+		relink.PwdHint = &hint.String
 		relink.Link = &link.String
 		relink.Text = &text.String
 		relink.Image = &image.String
@@ -87,7 +95,7 @@ func RelinkFromRow(rows *sql.Row) *Relink {
 
 // Get the relink from the database.
 func Get(key string, db *sql.DB) (*Relink, error) {
-	stmt := "SELECT key, type, link, text, image, mime, created_at, deleted_at FROM relink WHERE key = ?"
+	stmt := "SELECT key, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at FROM relink WHERE key = ?"
 	row := db.QueryRow(stmt, key)
 
 	relink := RelinkFromRow(row)
@@ -103,7 +111,7 @@ func Get(key string, db *sql.DB) (*Relink, error) {
 func IterRelink(ctx context.Context, db *sql.DB) (<-chan *Relink, error) {
 	ch := make(chan *Relink)
 
-	stmt := "SELECT key, type, link, text, image, mime, created_at, deleted_at FROM relink ORDER BY created_at DESC"
+	stmt := "SELECT key, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at FROM relink ORDER BY created_at DESC"
 	rows, err := db.Query(stmt)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to query the relink")
@@ -134,8 +142,8 @@ func IterRelink(ctx context.Context, db *sql.DB) (<-chan *Relink, error) {
 
 // Insert the relink into the database.
 func (r *Relink) Insert(db *sql.DB) error {
-	sql_stmt := "INSERT INTO relink (key, type, link, text, image, mime, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
-	_, err := db.Exec(sql_stmt, r.Key, r.Type, r.Link, r.Text, r.Image, r.Mime, r.CreatedAt)
+	sql_stmt := "INSERT INTO relink (key, type, password, pwd_hint, link, text, image, mime, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	_, err := db.Exec(sql_stmt, r.Key, r.Type, r.Password, r.PwdHint, r.Link, r.Text, r.Image, r.Mime, r.CreatedAt)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to save the key-value pair")
 		return err
@@ -158,16 +166,30 @@ func (r *Relink) Delete(db *sql.DB) error {
 
 // Load the relink from the database.
 func (r *Relink) Load(db *sql.DB) bool {
-	stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND link = ? AND text = ? AND image = ? AND mime = ?"
-	row := db.QueryRow(stmt, r.Type, r.Password, r.Link, r.Text, r.Image, r.Mime)
+	var row *sql.Row
 
-	switch target := RelinkFromRow(row); target {
-	case nil:
+	switch r.Type {
+	case RLink:
+		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND link = ? AND deleted_at IS NULL"
+		row = db.QueryRow(stmt, r.Type, r.Password, r.Link)
+	case RText:
+		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND text = ? AND deleted_at IS NULL"
+		row = db.QueryRow(stmt, r.Type, r.Password, r.Text)
+	default:
+		log.Debug().Str("type", string(r.Type)).Msg("unsupported type")
+		return false
+	}
+
+	var key string
+	switch err := row.Scan(&key); err {
+	case sql.ErrNoRows:
 		log.Debug().Msg("record not found")
 		return false
-	default:
-		r.Key = target.Key
-		r.DeletedAt = target.DeletedAt
+	case nil:
+		r.Key = key
 		return true
+	default:
+		log.Warn().Err(err).Msg("failed to scan the row")
+		return false
 	}
 }
