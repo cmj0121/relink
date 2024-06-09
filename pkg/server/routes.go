@@ -57,8 +57,14 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 	}
 
 	if relink.Password != nil && c.Query("password") != *relink.Password {
-		link := fmt.Sprintf("/#/need-password-%v", squash)
-		c.Redirect(http.StatusTemporaryRedirect, link)
+		switch relink.PwdHint {
+		case nil:
+			link := fmt.Sprintf("/#/need-password-%v", squash)
+			c.Redirect(http.StatusTemporaryRedirect, link)
+		default:
+			link := fmt.Sprintf("/?hint=%v&#/need-password-%v", *relink.PwdHint, squash)
+			c.Redirect(http.StatusTemporaryRedirect, link)
+		}
 		return
 	}
 

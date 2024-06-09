@@ -171,11 +171,11 @@ func (r *Relink) Load(db *sql.DB) bool {
 
 	switch r.Type {
 	case RLink:
-		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND link = ? AND deleted_at IS NULL"
-		row = db.QueryRow(stmt, r.Type, r.Password, r.Link)
+		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND pwd_hint = ? AND link = ? AND deleted_at IS NULL"
+		row = db.QueryRow(stmt, r.Type, r.Password, r.PwdHint, r.Link)
 	case RText:
-		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND text = ? AND deleted_at IS NULL"
-		row = db.QueryRow(stmt, r.Type, r.Password, r.Text)
+		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND pwd_hint = ?  AND text = ? AND deleted_at IS NULL"
+		row = db.QueryRow(stmt, r.Type, r.Password, r.PwdHint, r.Text)
 	default:
 		log.Debug().Str("type", string(r.Type)).Msg("unsupported type")
 		return false

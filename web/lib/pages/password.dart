@@ -21,6 +21,8 @@ class PasswordPage extends StatelessWidget {
             decoration: InputDecoration(
               prefixIcon: Icon(RecordIcon.lock.icon),
               hintText: AppLocalizations.of(context)?.txt_password,
+              helperText: hint(),
+              counterText: '',
             ),
             onSubmitted: to,
           ),
@@ -31,6 +33,13 @@ class PasswordPage extends StatelessWidget {
 
   void to(String password) {
     html.window.location.href = '/$code?password=$password';
+  }
+
+  String? hint() {
+    var uri = Uri.dataFromString(html.window.location.href);
+    var hint = uri.queryParameters['hint'];
+
+    return hint == null ? null : Uri.decodeComponent(hint);
   }
 }
 
