@@ -18,19 +18,19 @@ const (
 
 // The relink table to store the original data and the shortened link.
 type Relink struct {
-	Key      string     `json:"key"`
-	Type     RecordType `json:"type"`
-	Password *string    `json:"password"`
-	PwdHint  *string    `json:"pwd_hint"`
+	Key      string     `json:"key" faker:"uuid_hyphenated"`
+	Type     RelinkType `json:"type" faker:"oneof:link,text,image"`
+	Password *string    `json:"password" faker:"username"`
+	PwdHint  *string    `json:"pwd_hint" faker:"sentence"`
 
-	Link  *string `json:"link"`
-	Text  *string `json:"text"`
-	Image *string `json:"image"`
-	Mime  *string `json:"mime"`
+	Link  *string `json:"link" faker:"url"`
+	Text  *string `json:"text" faker:"sentence"`
+	Image *string `json:"image" fake:"-"`
+	Mime  *string `json:"mime" fake:"-"`
 
 	// the timestamp mixed with the source
 	CreatedAt time.Time  `json:"created_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at" faker:"-"`
 }
 
 // Create a new instance of Relink with the default settings.
@@ -69,7 +69,7 @@ func RelinkFromRow(rows *sql.Row) *Relink {
 	var mime sql.NullString
 	var deletedAt sql.NullTime
 
-	switch err := rows.Scan(&relink.Key, &relink.Type, &link, &text, &image, &mime, &relink.CreatedAt, deletedAt); err {
+	switch err := rows.Scan(&relink.Key, &relink.Type, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt); err {
 	case nil:
 		relink.Link = &link.String
 		relink.Text = &text.String
