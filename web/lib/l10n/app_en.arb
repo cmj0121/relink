@@ -16,6 +16,7 @@
     "txt_too_many_requests": "Too many requests",
     "txt_try_again_later": "Try again later ...",
     "txt_need_password": "Access {code} need password ...",
+    "txt_invalid_request": "Invalid or Bad Request",
     "txt_unknown_error": "Unkonwn Error",
     "txt_unlimited": "Unlimited",
     "txt_n_hour": "{hour} hour(s)",

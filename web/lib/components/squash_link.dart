@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
 
 import 'squash_base.dart';
 
@@ -12,6 +14,7 @@ class SquashLink extends StatefulWidget {
 
 class _SquashLinkState extends State<SquashLink> {
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _linkController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _hintController = TextEditingController();
   final TextEditingController _expiredController = TextEditingController();
@@ -28,6 +31,7 @@ class _SquashLinkState extends State<SquashLink> {
   @override
   Widget build(BuildContext context) {
     return SquashBase(
+      controller: _controller,
       passwordController: _passwordController,
       hintController: _hintController,
       expiredController: _expiredController,
@@ -37,16 +41,53 @@ class _SquashLinkState extends State<SquashLink> {
 
   Widget buildContent() {
     return TextField(
-      controller: _controller,
+      controller: _linkController,
       onSubmitted: (value) => squash(),
       textInputAction: TextInputAction.go,
       decoration: InputDecoration(
         hintText: AppLocalizations.of(context)?.txt_search_hint,
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.send),
+          onPressed: () => squash(),
+        ),
       ),
     );
   }
 
-  void squash() {
+  void squash() async {
+    final endpoint = Uri.parse('/api/squash');
+    final Map<String, dynamic> payload = {
+      'type': 'link',
+      'link': _linkController.text,
+      'password': _passwordController.text,
+      'pwd_hint': _hintController.text,
+    };
+
+    final header = {'Content-Type': 'application/json'};
+    final response = await http.post(endpoint, headers: header, body: jsonEncode(payload));
+    setState(() {
+      switch (response.statusCode) {
+        case 201:
+          _controller.text = jsonDecode(response.body) as String;
+          break;
+        case 400:
+          _controller.text = '';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.txt_invalid_request),
+            ),
+          );
+          break;
+        default:
+          _controller.text = '';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.txt_unknown_error),
+            ),
+          );
+          break;
+      }
+    });
   }
 }
 

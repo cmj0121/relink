@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"database/sql"
+	"net/url"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -190,6 +191,29 @@ func (r *Relink) Load(db *sql.DB) bool {
 		return true
 	default:
 		log.Warn().Err(err).Msg("failed to scan the row")
+		return false
+	}
+}
+
+// Check if the relink is valid.
+func (r *Relink) IsValid() bool {
+	switch r.Type {
+	case RLink:
+		if r.Link == nil || *r.Link == "" {
+			return false
+		}
+
+		link, err := url.Parse(*r.Link)
+		if err != nil || link.Scheme == "" {
+			return false
+		}
+
+		return true
+	case RText:
+		return r.Text != nil && *r.Text != ""
+	case RImage:
+		return r.Image != nil && *r.Image != ""
+	default:
 		return false
 	}
 }

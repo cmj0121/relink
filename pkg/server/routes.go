@@ -94,6 +94,11 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 		Text:      paylod.Text,
 		CreatedAt: time.Now(),
 	}
+	if !relink.IsValid() {
+		c.JSON(http.StatusBadRequest, nil)
+		return
+	}
+
 	if relink.Load(s.Conn.DB) && relink.DeletedAt == nil {
 		// the record is already exist
 		link := fmt.Sprintf("%v/%v", s.BaseURL, relink.Key)

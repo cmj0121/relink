@@ -16,6 +16,7 @@
     "txt_too_many_requests": "太多請求",
     "txt_try_again_later": "請稍後再嘗試 ...",
     "txt_need_password": "輸入密碼來存取 {code} ...",
+    "txt_invalid_request": "不正確或錯誤的請求",
     "txt_unknown_error": "不明錯誤",
     "txt_unlimited": "沒有限制",
     "txt_n_hour": "{hour} 小時",
