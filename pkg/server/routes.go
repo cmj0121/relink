@@ -94,6 +94,11 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 		Text:      paylod.Text,
 		CreatedAt: time.Now(),
 	}
+	if relink.Load(s.Conn.DB) && relink.DeletedAt == nil {
+		// the record is already exist
+		c.JSON(http.StatusCreated, relink.Key)
+		return
+	}
 
 	for size := s.MinSize; size <= s.MaxSize; size++ {
 		relink.Key = s.randomString(size)

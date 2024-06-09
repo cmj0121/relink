@@ -155,3 +155,19 @@ func (r *Relink) Delete(db *sql.DB) error {
 
 	return nil
 }
+
+// Load the relink from the database.
+func (r *Relink) Load(db *sql.DB) bool {
+	stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND link = ? AND text = ? AND image = ? AND mime = ?"
+	row := db.QueryRow(stmt, r.Type, r.Password, r.Link, r.Text, r.Image, r.Mime)
+
+	switch target := RelinkFromRow(row); target {
+	case nil:
+		log.Debug().Msg("record not found")
+		return false
+	default:
+		r.Key = target.Key
+		r.DeletedAt = target.DeletedAt
+		return true
+	}
+}
