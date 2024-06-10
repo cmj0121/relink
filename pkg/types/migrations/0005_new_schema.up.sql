@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS `relink_2` (
 	mime VARCHAR(225),
 
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	deleted_at TIMESTAMP
+	deleted_at TIMESTAMP,
+	expired_at TIMESTAMP
 );
 
 INSERT INTO `relink_2` (key, type, password, link, created_at) SELECT key, 'link', password, value, created_at FROM `relink`;

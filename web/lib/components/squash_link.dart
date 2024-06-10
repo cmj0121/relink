@@ -61,6 +61,7 @@ class _SquashLinkState extends State<SquashLink> {
       'link': _linkController.text,
       'password': _passwordController.text,
       'pwd_hint': _hintController.text,
+      'expired_hours': expired_hours(),
     };
 
     final header = {'Content-Type': 'application/json'};
@@ -88,6 +89,11 @@ class _SquashLinkState extends State<SquashLink> {
           break;
       }
     });
+  }
+
+  int? expired_hours() {
+    final text = _expiredController.text;
+    return text.isEmpty ? null : int.tryParse(text);
   }
 }
 

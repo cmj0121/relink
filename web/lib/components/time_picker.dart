@@ -41,6 +41,7 @@ extension TimeChoiceExtension on TimeChoice {
 
     switch (this) {
       case TimeChoice.unlimited:
+        duration = null;
       case TimeChoice.hour_1:
         duration = const Duration(hours: 1);
       case TimeChoice.hour_2:

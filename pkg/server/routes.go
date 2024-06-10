@@ -21,10 +21,11 @@ var (
 type RelinkBody struct {
 	Type string `json:"type"`
 
-	Password *string `json:"password"`
-	PwdHint  *string `json:"pwd_hint"`
-	Link     *string `json:"link"`
-	Text     *string `json:"text"`
+	Password    *string `json:"password"`
+	PwdHint     *string `json:"pwd_hint"`
+	Link        *string `json:"link"`
+	Text        *string `json:"text"`
+	ExpiredHour *int    `json:"expired_hours"`
 }
 
 // The global interface to register the routes.
@@ -56,7 +57,13 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 		return
 	}
 
-	if relink.Password != nil && c.Query("password") != *relink.Password {
+	if relink.DeletedAt != nil {
+		log.Info().Str("key", squash).Msg("the relink is deleted")
+		c.JSON(http.StatusGone, nil)
+	} else if relink.ExpiredAt != nil && relink.ExpiredAt.Before(time.Now()) {
+		log.Info().Str("key", squash).Time("expired_at", *relink.ExpiredAt).Msg("the relink is expired")
+		c.JSON(http.StatusGone, nil)
+	} else if relink.Password != nil && c.Query("password") != *relink.Password {
 		switch relink.PwdHint {
 		case nil:
 			link := fmt.Sprintf("/#/need-password-%v", squash)
@@ -100,6 +107,12 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 		Text:      paylod.Text,
 		CreatedAt: time.Now(),
 	}
+	if paylod.ExpiredHour != nil {
+		expired_at := relink.CreatedAt.Add(time.Hour * time.Duration(*paylod.ExpiredHour))
+		relink.ExpiredAt = &expired_at
+		log.Debug().Time("expired_at", *relink.ExpiredAt).Msg("set the expired time")
+	}
+
 	if !relink.IsValid() {
 		c.JSON(http.StatusBadRequest, nil)
 		return
