@@ -1,6 +1,14 @@
 {
+    "tab_link": "連結",
+    "tab_text": "文字",
+    "tab_image": "圖片",
+    "tab_video": "影片",
+    "btn_cancel": "取消",
+    "btn_confirm": "確認",
     "txt_password": "密碼",
+    "txt_password_hint": "密碼提示",
     "txt_search_hint": "輸入你要縮短的網址 ...",
+    "txt_text_hint": "輸入你要分享的文字 ...",
     "txt_copied_to_clipboard": "已複製到剪貼簿: {_squashedLink}",
     "txt_copied_password": "已複製密碼",
     "txt_unauthorized": "尚未登入",
@@ -8,6 +16,13 @@
     "txt_too_many_requests": "太多請求",
     "txt_try_again_later": "請稍後再嘗試 ...",
     "txt_need_password": "輸入密碼來存取 {code} ...",
+    "txt_invalid_request": "不正確或錯誤的請求",
     "txt_unknown_error": "不明錯誤",
+    "txt_expired": "連結已過期 ...",
+    "txt_unlimited": "沒有限制",
+    "txt_n_hour": "{hour} 小時",
+    "txt_n_day": "{hour} 天",
+    "txt_work_in_progress": "施工中 ...",
+    "txt_select_or_drop_image": "選擇或拖放圖片 ...",
     "err_invalid_url": "不合法的連結: {url}"
 }

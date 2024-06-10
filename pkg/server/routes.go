@@ -4,14 +4,35 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/cmj0121/relink/pkg/types"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
+
+var (
+	fileHandler http.Handler
+	letters     = []rune("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+)
+
+type RelinkBody struct {
+	Type string `json:"type"`
+
+	Password    *string `json:"password"`
+	PwdHint     *string `json:"pwd_hint"`
+	Link        *string `json:"link"`
+	Text        *string `json:"text"`
+	ExpiredHour *int    `json:"expired_hours"`
+}
 
 // The global interface to register the routes.
 func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
+	fs, _ := fs.Sub(view, "web/build/web")
+	fileHandler = http.FileServer(http.FS(fs))
+
 	// register the route for the health check
 	r.Any("/:squash", s.routeSolveSquash)
 	r.POST("/api/squash", s.routeGenerateSquash)
@@ -23,64 +44,138 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 	}
 
 	// serve the static files
-	fs, _ := fs.Sub(view, "web/build/web")
-	r.StaticFS("/_", http.FS(fs))
-	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusTemporaryRedirect, "/_/index.html")
-	})
+	r.NoRoute(s.routeStatic)
 }
 
 // Solve the squash link and redirect to the original link.
 func (s *Server) routeSolveSquash(c *gin.Context) {
-	// solve the squash link to get the original link
-	squashed := c.Param("squash")
-	record := s.Squash.Storage.SearchSource(squashed)
+	squash := c.Param("squash")
 
-	if record == nil {
-		c.AbortWithStatus(http.StatusNotFound)
-	} else if record.Password == nil || c.Query("password") == *record.Password {
-		// use HTTP 307 to redirect to the original link to keep the original method
-		c.Redirect(http.StatusTemporaryRedirect, record.Source)
-	} else {
-		link := fmt.Sprintf("/_/#/need-password-%v", squashed)
+	relink, err := types.Get(squash, s.Conn.DB)
+	if err != nil || relink == nil {
+		s.routeStatic(c)
+		return
+	}
+
+	if relink.DeletedAt != nil {
+		log.Info().Str("key", squash).Time("deleted_at", *relink.DeletedAt).Msg("the relink is deleted")
+
+		link := fmt.Sprintf("/?code=%v&#/expired", squash)
 		c.Redirect(http.StatusTemporaryRedirect, link)
+	} else if relink.ExpiredAt != nil && relink.ExpiredAt.Before(time.Now()) {
+		log.Info().Str("key", squash).Time("expired_at", *relink.ExpiredAt).Msg("the relink is expired")
+
+		link := fmt.Sprintf("/?code=%v&#/expired", squash)
+		c.Redirect(http.StatusTemporaryRedirect, link)
+	} else if relink.Password != nil && c.Query("password") != *relink.Password {
+		switch relink.PwdHint {
+		case nil:
+			link := fmt.Sprintf("/#/need-password-%v", squash)
+			c.Redirect(http.StatusTemporaryRedirect, link)
+		default:
+			link := fmt.Sprintf("/?hint=%v&#/need-password-%v", *relink.PwdHint, squash)
+			c.Redirect(http.StatusTemporaryRedirect, link)
+		}
+		return
+	}
+
+	switch {
+	case relink.Type == types.RLink && relink.Link != nil:
+		// use HTTP 307 to redirect to the original link to keep the original method
+		c.Redirect(http.StatusTemporaryRedirect, *relink.Link)
+	case relink.Type == types.RText && relink.Text != nil:
+		// show the raw plain text
+		c.String(http.StatusOK, *relink.Text)
+	default:
+		// treat as the unauthorized request
+		link := fmt.Sprintf("/#/need-password-%v", squash)
+		c.Redirect(http.StatusTemporaryRedirect, link)
+		return
 	}
 }
 
 // Generate the squash link and return the squashed link.
 func (s *Server) routeGenerateSquash(c *gin.Context) {
-	src := c.Query("src")
-	if src == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing src"})
+	paylod := &RelinkBody{}
+
+	if err := c.BindJSON(&paylod); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// the remote IP address
-	remote := c.ClientIP()
+	relink := types.Relink{
+		IP:        c.ClientIP(),
+		Type:      types.RelinkType(paylod.Type),
+		Password:  paylod.Password,
+		PwdHint:   paylod.PwdHint,
+		Link:      paylod.Link,
+		Text:      paylod.Text,
+		CreatedAt: time.Now(),
+	}
+	if paylod.ExpiredHour != nil {
+		expired_at := relink.CreatedAt.Add(time.Hour * time.Duration(*paylod.ExpiredHour))
+		relink.ExpiredAt = &expired_at
+		log.Debug().Time("expired_at", *relink.ExpiredAt).Msg("set the expired time")
+	}
 
-	// generate the squashed link
-	passwd := c.Query("password")
-	squashed, err := s.Squash.SquashToLink(src, passwd, &remote)
+	if !relink.IsValid() {
+		c.JSON(http.StatusBadRequest, nil)
+		return
+	}
+
+	if relink.Load(s.Conn.DB) && relink.DeletedAt == nil {
+		// the record is already exist
+		link := fmt.Sprintf("%v/%v", s.BaseURL, relink.Key)
+		c.JSON(http.StatusCreated, link)
+		return
+	}
+
+	for size := s.MinSize; size <= s.MaxSize; size++ {
+		relink.Key = s.randomString(size)
+
+		log.Debug().Interface("relink", relink).Msg("try to save the record")
+		if err := relink.Insert(s.Conn.DB); err != nil {
+			log.Info().Err(err).Msg("failed to save the record")
+			continue
+		}
+
+		link := fmt.Sprintf("%v/%v", s.BaseURL, relink.Key)
+		c.JSON(http.StatusCreated, link)
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, nil)
+}
+
+// List all the squashed links.
+func (s *Server) routeListSquash(c *gin.Context) {
+	records := []*types.Relink{}
+
+	iter, err := types.IterRelink(c, s.Conn.DB)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, squashed)
-}
-
-// List all the squashed links.
-func (s *Server) routeListSquash(c *gin.Context) {
-	records := []*types.Record{}
-
-	for record := range s.Squash.Storage.List(c) {
-		switch record {
-		case nil:
-			continue
-		default:
-			records = append(records, record)
+	for r := range iter {
+		if r != nil {
+			records = append(records, r)
 		}
 	}
 
 	c.JSON(http.StatusOK, records)
+}
+
+// Serve the static web UI
+func (s *Server) routeStatic(c *gin.Context) {
+	fileHandler.ServeHTTP(c.Writer, c.Request)
+}
+
+// Generate a random string with the given length.
+func (s *Server) randomString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }

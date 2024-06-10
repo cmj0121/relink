@@ -14,7 +14,7 @@ run:			# run in the local environment
 
 build:			# build the binary/library
 	cp ../assets/logo.svg web/favicon.svg
-	flutter build web --base-href /_/
+	flutter build web
 
 static:			# run the static artifact
 	python3 -m http.server -d build/web

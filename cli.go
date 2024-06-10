@@ -7,7 +7,6 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/cmj0121/relink/pkg/server"
-	"github.com/cmj0121/relink/pkg/squash"
 	"github.com/cmj0121/relink/pkg/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -18,7 +17,6 @@ var view embed.FS
 
 type SubCommand struct {
 	Server  server.Server `cmd:"" help:"Run the RESTFul API server."`
-	Squash  squash.Squash `cmd:"" help:"Squash the link and make it shorter."`
 	Migrate types.Migrate `cmd:"" help:"Migrate the storage."`
 }
 
@@ -50,8 +48,6 @@ func (r *ReLink) Run(ctx *kong.Context) error {
 	switch subcmd := ctx.Command(); subcmd {
 	case "server":
 		return r.Server.Run(view)
-	case "squash <source>":
-		return r.Squash.Run()
 	case "migrate <database>":
 		return r.Migrate.Run()
 	default:

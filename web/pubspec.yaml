@@ -1,4 +1,4 @@
-name: web
+name: relink
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -40,6 +40,8 @@ dependencies:
   http: ^1.1.0
   intl: any
   universal_html: ^2.2.4
+  flutter_dropzone: ^3.0.7
+  web: ^0.5.1
 
 dev_dependencies:
   flutter_test:

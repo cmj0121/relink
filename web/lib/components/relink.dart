@@ -1,35 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'icons.dart';
 
 class RelinkType {
-  final String source;
-  final String hashed;
+  final String key;
   final String ip;
   final String type;
-  final String password;
+
+  final String? password;
+  final String? hint;
+
+  final String? link;
+  final String? text;
+
   final String createdAt;
+  final String? deletedAt;
+  final String? expiredAt;
 
   RelinkType({
-    required this.source,
-    required this.hashed,
+    required this.key,
     required this.ip,
     required this.type,
-    required this.password,
+    this.password,
+    this.hint,
+    this.link,
+    this.text,
     required this.createdAt,
+    this.deletedAt,
+    this.expiredAt,
   });
 
   static RelinkType fromJson(Map<String, dynamic> json) {
     return RelinkType(
-      source: json['source'],
-      hashed: json['hashed'],
+      key: json['key'],
       ip: json['ip'],
       type: json['type'],
       password: json['password'],
+      hint: json['hint'],
+      link: json['link'],
+      text: json['text'],
       createdAt: json['created_at'],
+      deletedAt: json['deleted_at'],
+      expiredAt: json['expired_at'],
     );
   }
 }
@@ -50,11 +66,10 @@ class Relink extends StatelessWidget {
   }
 
   Widget passwordIcon(BuildContext context) {
-    final String password = relink.password;
     final Widget passwordIcon = IconButton(
       icon: Icon(RecordIcon.lock.icon),
-      onPressed: password.isEmpty ? null : () {
-        Clipboard.setData(ClipboardData(text: password));
+      onPressed: relink.password == null ? null : () {
+        Clipboard.setData(ClipboardData(text: relink.password!));
 
         // pop-up the message that the password has been copied to the clipboard
         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,31 +81,60 @@ class Relink extends StatelessWidget {
     );
 
     return Opacity(
-      opacity: password.isEmpty ? 0.0 : 1.0,
+      opacity: relink.password == null ? 0.0 : 1.0,
       child: passwordIcon,
     );
   }
 
   Widget contentText(BuildContext context) {
+    final String text = relink.text ?? relink.link ?? '-';
+
     return Row(
       children: <Widget>[
         TextButton.icon(
-          icon: Icon(RecordIcon.link.icon),
-          label: Text(relink.hashed),
+          icon: relinkIcon(),
+          label: Text(relink.key),
           onPressed: () {
-            html.window.location.href = '/need-password-${relink.hashed}';
+            html.window.location.href = '/${relink.key}';
           },
         ),
-        Text(relink.source, overflow: TextOverflow.ellipsis),
+        Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
       ],
     );
   }
 
   Widget createdText(BuildContext context) {
+    final DateFormat formatter = DateFormat('MM-dd HH:mm z');
+    final DateTime createdAt = DateTime.parse(relink.createdAt);
+    final DateTime? expiredAt = relink.expiredAt == null ? null : DateTime.parse(relink.expiredAt!);
+
     return Container(
       padding: const EdgeInsets.only(top: 20),
-      child: Text(relink.createdAt),
+      child: Text(
+        formatter.format(expiredAt ?? createdAt),
+        style: TextStyle(
+          color: expiredAt == null ? Colors.black : Colors.red,
+        ),
+      ),
     );
+  }
+
+  Widget relinkIcon() {
+    late IconData icon;
+
+    switch (relink.type) {
+      case 'link':
+        icon = RecordIcon.link.icon;
+        break;
+      case 'text':
+        icon = RecordIcon.text.icon;
+        break;
+    default:
+      icon = RecordIcon.unknown.icon;
+      break;
+    }
+
+    return Icon(icon);
   }
 }
 
