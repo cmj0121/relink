@@ -50,14 +50,14 @@ func RelinkFromRows(rows *sql.Rows) *Relink {
 
 	switch err := rows.Scan(&relink.Key, &relink.Type, &password, &hint, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt, &expiredAt); err {
 	case nil:
-		relink.Password = &password.String
-		relink.PwdHint = &hint.String
-		relink.Link = &link.String
-		relink.Text = &text.String
-		relink.Image = &image.String
-		relink.Mime = &mime.String
-		relink.DeletedAt = &deletedAt.Time
-		relink.ExpiredAt = &expiredAt.Time
+		relink.Password = nullableString(password)
+		relink.PwdHint = nullableString(hint)
+		relink.Link = nullableString(link)
+		relink.Text = nullableString(text)
+		relink.Image = nullableString(image)
+		relink.Mime = nullableString(mime)
+		relink.DeletedAt = nullableTime(deletedAt)
+		relink.ExpiredAt = nullableTime(expiredAt)
 		return &relink
 	case sql.ErrNoRows:
 		return nil
@@ -82,14 +82,14 @@ func RelinkFromRow(rows *sql.Row) *Relink {
 
 	switch err := rows.Scan(&relink.Key, &relink.Type, &password, &hint, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt, &expiredAt); err {
 	case nil:
-		relink.Password = &password.String
-		relink.PwdHint = &hint.String
-		relink.Link = &link.String
-		relink.Text = &text.String
-		relink.Image = &image.String
-		relink.Mime = &mime.String
-		relink.DeletedAt = &deletedAt.Time
-		relink.ExpiredAt = &expiredAt.Time
+		relink.Password = nullableString(password)
+		relink.PwdHint = nullableString(hint)
+		relink.Link = nullableString(link)
+		relink.Text = nullableString(text)
+		relink.Image = nullableString(image)
+		relink.Mime = nullableString(mime)
+		relink.DeletedAt = nullableTime(deletedAt)
+		relink.ExpiredAt = nullableTime(expiredAt)
 		return &relink
 	case sql.ErrNoRows:
 		return nil
@@ -176,11 +176,11 @@ func (r *Relink) Load(db *sql.DB) bool {
 
 	switch r.Type {
 	case RLink:
-		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND pwd_hint = ? AND link = ? AND expired_at IS ? AND deleted_at IS NULL "
-		row = db.QueryRow(stmt, r.Type, r.Password, r.PwdHint, r.Link, r.ExpiredAt)
+		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND pwd_hint = ? AND link = ? AND deleted_at IS NULL AND expired_at IS NULL"
+		row = db.QueryRow(stmt, r.Type, r.Password, r.PwdHint, r.Link)
 	case RText:
-		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND pwd_hint = ?  AND text = ? AND expired_at IS ? AND deleted_at IS NULL"
-		row = db.QueryRow(stmt, r.Type, r.Password, r.PwdHint, r.Text, r.ExpiredAt)
+		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND pwd_hint = ?  AND text = ? AND deleted_at IS NULL AND expired_at IS NULL"
+		row = db.QueryRow(stmt, r.Type, r.Password, r.PwdHint, r.Text)
 	default:
 		log.Debug().Str("type", string(r.Type)).Msg("unsupported type")
 		return false
@@ -221,4 +221,22 @@ func (r *Relink) IsValid() bool {
 	default:
 		return false
 	}
+}
+
+// get the nullable string
+func nullableString(s sql.NullString) *string {
+	if s.Valid {
+		return &s.String
+	}
+
+	return nil
+}
+
+// get the nullable time
+func nullableTime(t sql.NullTime) *time.Time {
+	if t.Valid {
+		return &t.Time
+	}
+
+	return nil
 }

@@ -58,7 +58,7 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 	}
 
 	if relink.DeletedAt != nil {
-		log.Info().Str("key", squash).Msg("the relink is deleted")
+		log.Info().Str("key", squash).Time("deleted_at", *relink.DeletedAt).Msg("the relink is deleted")
 
 		link := fmt.Sprintf("/?code=%v&#/expired", squash)
 		c.Redirect(http.StatusTemporaryRedirect, link)
