@@ -20,6 +20,7 @@ const (
 // The relink table to store the original data and the shortened link.
 type Relink struct {
 	Key      string     `json:"key" faker:"uuid_hyphenated"`
+	IP       string     `json:"ip" faker:"ipv4"`
 	Type     RelinkType `json:"type" faker:"oneof:link,text,image"`
 	Password *string    `json:"password" faker:"username"`
 	PwdHint  *string    `json:"pwd_hint" faker:"sentence"`
@@ -48,7 +49,7 @@ func RelinkFromRows(rows *sql.Rows) *Relink {
 	var deletedAt sql.NullTime
 	var expiredAt sql.NullTime
 
-	switch err := rows.Scan(&relink.Key, &relink.Type, &password, &hint, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt, &expiredAt); err {
+	switch err := rows.Scan(&relink.Key, &relink.IP, &relink.Type, &password, &hint, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt, &expiredAt); err {
 	case nil:
 		relink.Password = nullableString(password)
 		relink.PwdHint = nullableString(hint)
@@ -80,7 +81,7 @@ func RelinkFromRow(rows *sql.Row) *Relink {
 	var deletedAt sql.NullTime
 	var expiredAt sql.NullTime
 
-	switch err := rows.Scan(&relink.Key, &relink.Type, &password, &hint, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt, &expiredAt); err {
+	switch err := rows.Scan(&relink.Key, &relink.IP, &relink.Type, &password, &hint, &link, &text, &image, &mime, &relink.CreatedAt, &deletedAt, &expiredAt); err {
 	case nil:
 		relink.Password = nullableString(password)
 		relink.PwdHint = nullableString(hint)
@@ -101,7 +102,7 @@ func RelinkFromRow(rows *sql.Row) *Relink {
 
 // Get the relink from the database.
 func Get(key string, db *sql.DB) (*Relink, error) {
-	stmt := "SELECT key, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at FROM relink WHERE key = ?"
+	stmt := "SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at FROM relink WHERE key = ?"
 	row := db.QueryRow(stmt, key)
 
 	relink := RelinkFromRow(row)
@@ -117,7 +118,7 @@ func Get(key string, db *sql.DB) (*Relink, error) {
 func IterRelink(ctx context.Context, db *sql.DB) (<-chan *Relink, error) {
 	ch := make(chan *Relink)
 
-	stmt := "SELECT key, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at FROM relink ORDER BY created_at DESC"
+	stmt := "SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at FROM relink ORDER BY created_at DESC"
 	rows, err := db.Query(stmt)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to query the relink")
@@ -148,8 +149,8 @@ func IterRelink(ctx context.Context, db *sql.DB) (<-chan *Relink, error) {
 
 // Insert the relink into the database.
 func (r *Relink) Insert(db *sql.DB) error {
-	sql_stmt := "INSERT INTO relink (key, type, password, pwd_hint, link, text, image, mime, created_at, expired_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	_, err := db.Exec(sql_stmt, r.Key, r.Type, r.Password, r.PwdHint, r.Link, r.Text, r.Image, r.Mime, r.CreatedAt, r.ExpiredAt)
+	sql_stmt := "INSERT INTO relink (key, ip, type, password, pwd_hint, link, text, image, mime, created_at, expired_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	_, err := db.Exec(sql_stmt, r.Key, r.IP, r.Type, r.Password, r.PwdHint, r.Link, r.Text, r.Image, r.Mime, r.CreatedAt, r.ExpiredAt)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to save the key-value pair")
 		return err

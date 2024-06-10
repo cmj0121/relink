@@ -104,6 +104,7 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 	}
 
 	relink := types.Relink{
+		IP:        c.ClientIP(),
 		Type:      types.RelinkType(paylod.Type),
 		Password:  paylod.Password,
 		PwdHint:   paylod.PwdHint,

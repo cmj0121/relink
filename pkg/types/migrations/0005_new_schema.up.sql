@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS `relink_2` (
 	key VARCHAR(225) NOT NULL PRIMARY KEY,
+	ip VARCHAR(225) NOT NULL,
 	type VARCHAR(225) NOT NULL,
 	password VARCHAR(225),
 	pwd_hint VARCHAR(225),
@@ -13,4 +14,5 @@ CREATE TABLE IF NOT EXISTS `relink_2` (
 	expired_at TIMESTAMP
 );
 
-INSERT INTO `relink_2` (key, type, password, link, created_at) SELECT key, 'link', password, value, created_at FROM `relink`;
+INSERT INTO `relink_2` (key, ip, type, password, link, created_at)
+SELECT key, IFNULL(creator_ip, '-') , 'link', password, value, created_at FROM `relink`;
