@@ -87,7 +87,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   void loadRelinks() async {
-    final endpoint = Uri.parse('http://localhost:8080/api/squash');
+    final endpoint = Uri.parse('/api/squash');
     final headers = {'Authorization': _textController.text};
     final response = await http.get(endpoint, headers: headers);
 
