@@ -7,6 +7,7 @@ import 'page.dart';
 enum Routes {
   pageIndex,
   pageAdminList,
+  pageExpired,
 }
 
 void routeTo(Routes route, BuildContext context) {
@@ -17,6 +18,8 @@ void routeTo(Routes route, BuildContext context) {
     case Routes.pageAdminList:
       Navigator.of(context).pushNamedAndRemoveUntil('/_admin/list', (route) => false);
       break;
+    case Routes.pageExpired:
+      Navigator.of(context).pushNamedAndRemoveUntil('/expired', (route) => false);
     default:
       Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
   }
@@ -46,6 +49,9 @@ class ReLinkApp extends StatelessWidget {
             break;
           case '/_admin/list':
             child = const AdminPage();
+            break;
+          case '/expired':
+            child = const ExpiredPage();
             break;
           default:
             final match = RegExp(r'^/need-password-(\w+)');

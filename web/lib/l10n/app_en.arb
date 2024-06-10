@@ -18,6 +18,7 @@
     "txt_need_password": "Access {code} need password ...",
     "txt_invalid_request": "Invalid or Bad Request",
     "txt_unknown_error": "Unkonwn Error",
+    "txt_expired": "The link is expired ...",
     "txt_unlimited": "Unlimited",
     "txt_n_hour": "{hour} hour(s)",
     "txt_n_day": "{hour} day(s)",

@@ -59,10 +59,14 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 
 	if relink.DeletedAt != nil {
 		log.Info().Str("key", squash).Msg("the relink is deleted")
-		c.JSON(http.StatusGone, nil)
+
+		link := fmt.Sprintf("/?code=%v&#/expired", squash)
+		c.Redirect(http.StatusTemporaryRedirect, link)
 	} else if relink.ExpiredAt != nil && relink.ExpiredAt.Before(time.Now()) {
 		log.Info().Str("key", squash).Time("expired_at", *relink.ExpiredAt).Msg("the relink is expired")
-		c.JSON(http.StatusGone, nil)
+
+		link := fmt.Sprintf("/?code=%v&#/expired", squash)
+		c.Redirect(http.StatusTemporaryRedirect, link)
 	} else if relink.Password != nil && c.Query("password") != *relink.Password {
 		switch relink.PwdHint {
 		case nil:
