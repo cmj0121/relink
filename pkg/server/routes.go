@@ -79,6 +79,19 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 		return
 	}
 
+	access_log := types.AccessLog{
+		Key:       squash,
+		IP:        c.ClientIP(),
+		UserAgent: c.GetHeader("User-Agent"),
+		CreatedAt: time.Now(),
+	}
+	defer func() {
+		err := access_log.Insert(s.Conn.DB)
+		if err != nil {
+			log.Warn().Err(err).Msg("failed to save the access log")
+		}
+	}()
+
 	switch {
 	case relink.Type == types.RLink && relink.Link != nil:
 		// use HTTP 307 to redirect to the original link to keep the original method

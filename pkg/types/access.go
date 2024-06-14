@@ -36,7 +36,7 @@ func AccessLogFromRows(rows *sql.Rows) *AccessLog {
 func IterAccessLog(ctx context.Context, db *sql.DB, hashed string) (chan<- *AccessLog, error) {
 	ch := make(chan *AccessLog)
 
-	stmt := "SELECT key, ip, user_agent, created_at FROM access_log WHERE hashed = ?"
+	stmt := "SELECT key, ip, user_agent, created_at FROM access_log WHERE key = ? ORDER BY created_at DESC"
 	rows, err := db.Query(stmt, hashed)
 	if err != nil {
 		log.Warn().Err(err).Str("hashed", hashed).Msg("failed to query the access log")
@@ -64,4 +64,16 @@ func IterAccessLog(ctx context.Context, db *sql.DB, hashed string) (chan<- *Acce
 	}()
 
 	return ch, nil
+}
+
+// Insert the access log into the database.
+func (a *AccessLog) Insert(db *sql.DB) error {
+	sql_stmt := "INSERT INTO relink_access_log (key, ip, user_agent, created_at) VALUES (?, ?, ?, ?)"
+	_, err := db.Exec(sql_stmt, a.Key, a.IP, a.UserAgent, a.CreatedAt)
+	if err != nil {
+		log.Warn().Err(err).Msg("failed to save the access log")
+		return err
+	}
+
+	return nil
 }
