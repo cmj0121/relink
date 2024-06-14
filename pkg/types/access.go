@@ -17,6 +17,18 @@ type AccessLog struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type StatByGroup struct {
+	Count int    `json:"count"`
+	Range string `json:"range"`
+}
+
+type Statistics struct {
+	Key string `json:"key"`
+
+	Total int           `json:"total"`
+	Graph []StatByGroup `json:"graph"`
+}
+
 // Create a new instance of AccessLog from the query row.
 func AccessLogFromRows(rows *sql.Rows) *AccessLog {
 	var access_log AccessLog
@@ -32,38 +44,54 @@ func AccessLogFromRows(rows *sql.Rows) *AccessLog {
 	}
 }
 
-// Iterate the access log from the database.
-func IterAccessLog(ctx context.Context, db *sql.DB, hashed string) (chan<- *AccessLog, error) {
-	ch := make(chan *AccessLog)
-
-	stmt := "SELECT key, ip, user_agent, created_at FROM access_log WHERE key = ? ORDER BY created_at DESC"
-	rows, err := db.Query(stmt, hashed)
-	if err != nil {
-		log.Warn().Err(err).Str("hashed", hashed).Msg("failed to query the access log")
-		return nil, err
+func (s *Statistics) Analysis(ctx context.Context, db *sql.DB) error {
+	if err := s.GetTotal(ctx, db); err != nil {
+		return err
+	} else if err := s.GetGraph(ctx, db); err != nil {
+		return err
 	}
 
-	go func() {
-		defer close(ch)
-		defer rows.Close()
+	return nil
+}
 
-		for rows.Next() {
-			access_log := AccessLogFromRows(rows)
-			if access_log == nil {
-				log.Debug().Msg("skip the empty log")
-				continue
-			}
+func (s *Statistics) GetTotal(ctx context.Context, db *sql.DB) error {
+	stmt := `SELECT COUNT(*) FROM relink_access_log WHERE key = ?`
+	row := db.QueryRowContext(ctx, stmt, s.Key)
 
-			select {
-			case <-ctx.Done():
-				return
-			case ch <- access_log:
-			}
+	if err := row.Scan(&s.Total); err != nil {
+		log.Warn().Err(err).Str("key", s.Key).Msg("failed to scan the access log")
+		return err
+	}
+
+	return nil
+}
+
+func (s *Statistics) GetGraph(ctx context.Context, db *sql.DB) error {
+	stmt := `
+		SELECT DATE(created_at) AS date, COUNT(*) AS count
+		FROM relink_access_log
+		WHERE key = ?
+		GROUP BY date
+	`
+
+	rows, err := db.QueryContext(ctx, stmt, s.Key)
+	if err != nil {
+		log.Warn().Err(err).Str("key", s.Key).Msg("failed to get the access log")
+		return err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var stat StatByGroup
+		if err := rows.Scan(&stat.Range, &stat.Count); err != nil {
+			log.Warn().Err(err).Str("key", s.Key).Msg("failed to scan the access log")
+			return err
 		}
 
-	}()
+		s.Graph = append(s.Graph, stat)
+	}
 
-	return ch, nil
+	return nil
 }
 
 // Insert the access log into the database.

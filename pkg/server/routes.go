@@ -36,6 +36,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 	// register the route for the health check
 	r.Any("/:squash", s.routeSolveSquash)
 	r.POST("/api/squash", s.routeGenerateSquash)
+	r.GET("/api/:squash/statistics", s.routeStatisticsSquash)
 
 	auth := r.Group("/")
 	{
@@ -177,6 +178,20 @@ func (s *Server) routeListSquash(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, records)
+}
+
+// show the statistics of the squashed links.
+func (s *Server) routeStatisticsSquash(c *gin.Context) {
+	stat := &types.Statistics{
+		Key: c.Param("squash"),
+	}
+
+	switch err := stat.Analysis(c, s.Conn.DB); err {
+	case nil:
+		c.JSON(http.StatusOK, stat)
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 }
 
 // Serve the static web UI
