@@ -130,9 +130,35 @@ class _SquashBaseState extends State<SquashBase> {
   }
 
   Widget squashedQRCode(String link) {
-    return QrImageView(
-      data: link,
-      version: QrVersions.auto,
+    return InkWell(
+      child: QrImageView(data: link),
+      onTap: () => floatImage(link),
+    );
+  }
+
+  Future<void> floatImage(String link) {
+    final double size = MediaQuery.of(context).size.width * 0.8;
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SizedBox(
+            width: size,
+            height: size,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(link),
+                  const SizedBox(height: 10),
+                  Flexible(child: QrImageView(data: link)),
+                ],
+              ),
+            )
+          ),
+        );
+      }
     );
   }
 
