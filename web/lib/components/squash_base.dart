@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import 'icons.dart';
 import 'loading.dart';
@@ -59,7 +60,7 @@ class _SquashBaseState extends State<SquashBase> {
         const SizedBox(height: 10),
         const Loading(icon: Icons.keyboard_arrow_down_outlined),
         const SizedBox(height: 10),
-        squashLinkField(),
+        Flexible(child: squashLinkField()),
       ],
     );
   }
@@ -98,24 +99,66 @@ class _SquashBaseState extends State<SquashBase> {
   }
 
   Widget squashLinkField() {
-    final String squashedLink = _controller.text;
+    final String link = _controller.text;
 
     return Opacity(
-      opacity: squashedLink.isEmpty ? 0.0 : 1.0,
-      child: Row(
+      opacity: link.isEmpty ? 0.0 : 1.0,
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(RecordIcon.copy.icon),
-            onPressed: squashedLink.isEmpty ? null : copyLink,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            squashedLink,
-            style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
-          ),
-        ],
+        children: [
+          Flexible(child: squashedLink(link)),
+          Expanded(child: squashedQRCode(link)),
+        ]
       ),
+    );
+  }
+
+  Widget squashedLink(String link) {
+    final style = DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(RecordIcon.copy.icon),
+          onPressed: copyLink,
+        ),
+        const SizedBox(width: 10),
+        Text(link, style: style),
+      ],
+    );
+  }
+
+  Widget squashedQRCode(String link) {
+    return InkWell(
+      child: QrImageView(data: link),
+      onTap: () => floatImage(link),
+    );
+  }
+
+  Future<void> floatImage(String link) {
+    final double size = MediaQuery.of(context).size.width * 0.8;
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SizedBox(
+            width: size,
+            height: size,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(link),
+                  const SizedBox(height: 10),
+                  Flexible(child: QrImageView(data: link)),
+                ],
+              ),
+            )
+          ),
+        );
+      }
     );
   }
 
