@@ -54,14 +54,19 @@ class ReLinkApp extends StatelessWidget {
             child = const ExpiredPage();
             break;
           default:
-            final match = RegExp(r'^/need-password-(\w+)');
+            final matchPassword = RegExp(r'^/need-password-(\w+)');
+            final matchStatistics = RegExp(r'^/statistics-(\w+)');
 
-            if (!match.hasMatch(name)) {
+            if (matchPassword.hasMatch(name)) {
+              final code = matchPassword.firstMatch(name)!.group(1);
+              child = PasswordPage(code);
+            } else if (matchStatistics.hasMatch(name)) {
+              final code = matchStatistics.firstMatch(name)!.group(1);
+              child = StatisticsPage(code!);
+            } else {
               Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              child = Container();
             }
-
-            final code = match.firstMatch(name)!.group(1);
-            child = PasswordPage(code);
         }
 
         return MaterialPageRoute(
