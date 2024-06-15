@@ -39,7 +39,7 @@ class RelinkType {
       key: json['key'],
       ip: json['ip'],
       type: json['type'],
-      password: json['password'],
+      password: json['password']?.isEmpty == true ? null : json['password'],
       hint: json['hint'],
       link: json['link'],
       text: json['text'],
