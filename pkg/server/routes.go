@@ -35,7 +35,10 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 
 	// register the route for the health check
 	r.Any("/:squash", s.routeSolveSquash)
+	r.GET("/:squash/s", s.routeStatistics)
+	r.GET("/:squash/statistics", s.routeStatistics)
 	r.POST("/api/squash", s.routeGenerateSquash)
+	r.GET("/api/:squash/statistics", s.routeStatisticsSquash)
 
 	auth := r.Group("/")
 	{
@@ -78,6 +81,19 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 		}
 		return
 	}
+
+	access_log := types.AccessLog{
+		Code:      squash,
+		IP:        c.ClientIP(),
+		UserAgent: c.GetHeader("User-Agent"),
+		CreatedAt: time.Now(),
+	}
+	defer func() {
+		err := access_log.Insert(s.Conn.DB)
+		if err != nil {
+			log.Warn().Err(err).Msg("failed to save the access log")
+		}
+	}()
 
 	switch {
 	case relink.Type == types.RLink && relink.Link != nil:
@@ -164,6 +180,26 @@ func (s *Server) routeListSquash(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, records)
+}
+
+// show the statistics of the squashed links.
+func (s *Server) routeStatisticsSquash(c *gin.Context) {
+	stat := &types.Statistics{
+		Code: c.Param("squash"),
+	}
+
+	switch err := stat.Analysis(c, s.Conn.DB); err {
+	case nil:
+		c.JSON(http.StatusOK, stat)
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+}
+
+// redirect to the statistics page
+func (s *Server) routeStatistics(c *gin.Context) {
+	link := fmt.Sprintf("/#/statistics-%v", c.Param("squash"))
+	c.Redirect(http.StatusTemporaryRedirect, link)
 }
 
 // Serve the static web UI

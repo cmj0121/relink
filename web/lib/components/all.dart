@@ -6,3 +6,4 @@ export 'time_picker.dart';
 export 'squash_link.dart';
 export 'squash_text.dart';
 export 'squash_image.dart';
+export 'chart.dart';
