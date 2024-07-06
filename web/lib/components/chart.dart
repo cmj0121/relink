@@ -73,6 +73,7 @@ class Chart extends StatelessWidget {
   List<BarChartGroupData> get barGroups => data.map((chart) {
     return BarChartGroupData(
       x: data.indexOf(chart),
+      showingTooltipIndicators: [0],
       barRods: [
         BarChartRodData(
           toY: chart.count.toDouble(),
