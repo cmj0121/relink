@@ -25,15 +25,18 @@ class Chart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BarChart(
-      BarChartData(
-        barTouchData: barTouchData,
-        titlesData: titlesData,
-        borderData: FlBorderData(show: false),
-        barGroups: barGroups,
-        gridData: const FlGridData(show: false),
-        alignment: BarChartAlignment.spaceAround,
-        maxY: 20,
+    return ConstrainedBox(
+      constraints: const BoxConstraints.expand(height: 200),
+      child: BarChart(
+        BarChartData(
+          barTouchData: barTouchData,
+          titlesData: titlesData,
+          borderData: FlBorderData(show: false),
+          barGroups: barGroups,
+          gridData: const FlGridData(show: false),
+          alignment: BarChartAlignment.spaceAround,
+          maxY: 20,
+        ),
       ),
     );
   }
@@ -70,6 +73,7 @@ class Chart extends StatelessWidget {
   List<BarChartGroupData> get barGroups => data.map((chart) {
     return BarChartGroupData(
       x: data.indexOf(chart),
+      showingTooltipIndicators: [0],
       barRods: [
         BarChartRodData(
           toY: chart.count.toDouble(),
