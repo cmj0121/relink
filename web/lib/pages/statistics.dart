@@ -77,9 +77,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Flexible(child: buildTotalCount()),
+        Chart(_statistics!.data),
         const Divider(),
-        Flexible(child: Chart(_statistics!.data)),
+        Flexible(child: buildTotalCount()),
       ]
     );
   }
