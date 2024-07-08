@@ -35,7 +35,6 @@ class Chart extends StatelessWidget {
           barGroups: barGroups,
           gridData: const FlGridData(show: false),
           alignment: BarChartAlignment.spaceAround,
-          maxY: 20,
         ),
       ),
     );
