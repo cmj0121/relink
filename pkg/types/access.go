@@ -3,6 +3,8 @@ package types
 import (
 	"context"
 	"database/sql"
+	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -104,4 +106,43 @@ func (a *AccessLog) Insert(db *sql.DB) error {
 	}
 
 	return nil
+}
+
+// Iterate over the access log and return the list of access logs.
+func IterAccessLog(ctx context.Context, db *sql.DB, key, _size, _page string) []*AccessLog {
+	size, _ := strconv.Atoi(_size)
+	page, _ := strconv.Atoi(_page)
+
+	stmt := `
+		SELECT key, ip, user_agent, created_at
+		FROM relink_access_log
+		WHERE key = ?
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?
+	`
+
+	rows, err := db.QueryContext(ctx, stmt, key, size, size*page)
+	if err != nil {
+		log.Warn().Err(err).Str("key", key).Msg("failed to get the access log")
+		return nil
+	}
+
+	defer rows.Close()
+	var logs []*AccessLog
+	for rows.Next() {
+		if log := AccessLogFromRows(rows); log != nil {
+			// obfuscate the IP address and mask the latest two octets
+			ip := log.IP
+			if len(ip) > 0 {
+				re := regexp.MustCompile(`(\d+\.\d+)\.\d+\.\d+`)
+				ip = re.ReplaceAllString(ip, "$1.***.***")
+				log.IP = ip
+			}
+
+			logs = append(logs, log)
+		}
+	}
+
+	return logs
+
 }
