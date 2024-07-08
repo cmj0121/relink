@@ -39,6 +39,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 	r.GET("/:squash/statistics", s.routeStatistics)
 	r.POST("/api/squash", s.routeGenerateSquash)
 	r.GET("/api/:squash/statistics", s.routeStatisticsSquash)
+	r.GET("/api/:squash/access-log", s.routeAccessLog)
 
 	auth := r.Group("/")
 	{
@@ -205,6 +206,16 @@ func (s *Server) routeStatistics(c *gin.Context) {
 // Serve the static web UI
 func (s *Server) routeStatic(c *gin.Context) {
 	fileHandler.ServeHTTP(c.Writer, c.Request)
+}
+
+// List the access log of the squashed link.
+func (s *Server) routeAccessLog(c *gin.Context) {
+	squash := c.Param("squash")
+	size := c.DefaultQuery("size", "10")
+	page := c.DefaultQuery("page", "0")
+	logs := types.IterAccessLog(c, s.Conn.DB, squash, size, page)
+
+	c.JSON(http.StatusOK, logs)
 }
 
 // Generate a random string with the given length.
