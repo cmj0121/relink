@@ -27,7 +27,7 @@ type Relink struct {
 
 	Link  *string `json:"link" faker:"url"`
 	Text  *string `json:"text" faker:"sentence"`
-	Image *string `json:"image" fake:"-"`
+	Image *[]byte `json:"image" fake:"-"`
 	Mime  *string `json:"mime" fake:"-"`
 
 	// the timestamp mixed with the source
@@ -44,7 +44,7 @@ func RelinkFromRows(rows *sql.Rows) *Relink {
 	var hint sql.NullString
 	var link sql.NullString
 	var text sql.NullString
-	var image sql.NullString
+	var image []byte
 	var mime sql.NullString
 	var deletedAt sql.NullTime
 	var expiredAt sql.NullTime
@@ -55,7 +55,7 @@ func RelinkFromRows(rows *sql.Rows) *Relink {
 		relink.PwdHint = nullableString(hint)
 		relink.Link = nullableString(link)
 		relink.Text = nullableString(text)
-		relink.Image = nullableString(image)
+		relink.Image = nullableBytes(image)
 		relink.Mime = nullableString(mime)
 		relink.DeletedAt = nullableTime(deletedAt)
 		relink.ExpiredAt = nullableTime(expiredAt)
@@ -76,7 +76,7 @@ func RelinkFromRow(rows *sql.Row) *Relink {
 	var hint sql.NullString
 	var link sql.NullString
 	var text sql.NullString
-	var image sql.NullString
+	var image []byte
 	var mime sql.NullString
 	var deletedAt sql.NullTime
 	var expiredAt sql.NullTime
@@ -87,7 +87,7 @@ func RelinkFromRow(rows *sql.Row) *Relink {
 		relink.PwdHint = nullableString(hint)
 		relink.Link = nullableString(link)
 		relink.Text = nullableString(text)
-		relink.Image = nullableString(image)
+		relink.Image = nullableBytes(image)
 		relink.Mime = nullableString(mime)
 		relink.DeletedAt = nullableTime(deletedAt)
 		relink.ExpiredAt = nullableTime(expiredAt)
@@ -218,7 +218,7 @@ func (r *Relink) IsValid() bool {
 	case RText:
 		return r.Text != nil && *r.Text != ""
 	case RImage:
-		return r.Image != nil && *r.Image != ""
+		return r.Image != nil && len(*r.Image) > 0
 	default:
 		return false
 	}
@@ -228,6 +228,15 @@ func (r *Relink) IsValid() bool {
 func nullableString(s sql.NullString) *string {
 	if s.Valid {
 		return &s.String
+	}
+
+	return nil
+}
+
+// get the nullable bytes
+func nullableBytes(b []byte) *[]byte {
+	if len(b) > 0 {
+		return &b
 	}
 
 	return nil

@@ -44,6 +44,8 @@ dependencies:
   web: ^0.5.1
   qr_flutter: ^4.1.0
   fl_chart: ^0.68.0
+  mime: ^1.0.5
+  http_parser: ^4.0.2
 
 dev_dependencies:
   flutter_test:

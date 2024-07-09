@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	"fmt"
+	"io"
 	"io/fs"
 	"math/rand"
 	"net/http"
@@ -19,13 +20,14 @@ var (
 )
 
 type RelinkBody struct {
-	Type string `json:"type"`
+	Type string `json:"type" form:"type" binding:"required"`
 
-	Password    *string `json:"password"`
-	PwdHint     *string `json:"pwd_hint"`
-	Link        *string `json:"link"`
-	Text        *string `json:"text"`
-	ExpiredHour *int    `json:"expired_hours"`
+	Password *string `json:"password" form:"password"`
+	PwdHint  *string `json:"pwd_hint" form:"pwd_hint"`
+	Link     *string `json:"link" form:"link"`
+	Text     *string `json:"text" form:"text"`
+
+	ExpiredHour *int `json:"expired_hours" form:"expired_hours"`
 }
 
 // The global interface to register the routes.
@@ -115,8 +117,8 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 func (s *Server) routeGenerateSquash(c *gin.Context) {
 	paylod := &RelinkBody{}
 
-	if err := c.BindJSON(&paylod); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBind(&paylod); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "err"})
 		return
 	}
 
@@ -129,10 +131,29 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 		Text:      paylod.Text,
 		CreatedAt: time.Now(),
 	}
-	if paylod.ExpiredHour != nil {
+	if paylod.ExpiredHour != nil && *paylod.ExpiredHour > 0 {
 		expired_at := relink.CreatedAt.Add(time.Hour * time.Duration(*paylod.ExpiredHour))
 		relink.ExpiredAt = &expired_at
 		log.Debug().Time("expired_at", *relink.ExpiredAt).Msg("set the expired time")
+	}
+
+	if relink.Type == types.RImage {
+		file, header, err := c.Request.FormFile(string(types.RImage))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		defer file.Close()
+		mime := header.Header.Get("Content-Type")
+		image, err := io.ReadAll(file)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		relink.Image = &image
+		relink.Mime = &mime
 	}
 
 	if !relink.IsValid() {
