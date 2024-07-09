@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
 
 import 'squash_base.dart';
 import 'squash_file.dart';
@@ -70,7 +71,7 @@ class SquashImage extends StatefulWidget {
 }
 
 class _SquashImageState extends State<SquashImage> {
-  final TextEditingController _controller = TextEditingController();
+  final FileController _controller = FileController();
 
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _hintController = TextEditingController();
@@ -87,7 +88,7 @@ class _SquashImageState extends State<SquashImage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller.text.isEmpty) {
+    if (_controller.link == null) {
       return SquashFile(
         text: AppLocalizations.of(context)!.txt_select_or_drop_image,
         mime: const ['image/*'],
@@ -110,7 +111,7 @@ class _SquashImageState extends State<SquashImage> {
     return Row(
       children: [
         Flexible(
-          child: Center(child: ImageEditor(_controller.text)),
+          child: Center(child: ImageEditor(_controller.link!)),
         ),
         IconButton(
           icon: const Icon(Icons.send),
@@ -120,7 +121,26 @@ class _SquashImageState extends State<SquashImage> {
     );
   }
 
-  void squash() {
+  void squash() async {
+    final endpoint = Uri.parse('/api/squash');
+    var request = http.MultipartRequest('POST', endpoint);
+
+    // setup the JSON payload
+    request.fields['type'] = 'image';
+    request.fields['password'] = _passwordController.text;
+    request.fields['pwd_hint'] = _hintController.text;
+    request.fields['expired_hours'] = expiredHours()?.toString() ?? '';
+
+    // setup the image file
+    final image = http.MultipartFile.fromBytes('image', _controller.bytes!);
+    request.files.add(image);
+
+    await request.send();
+  }
+
+  int? expiredHours() {
+    final text = _expiredController.text;
+    return text.isEmpty ? null : int.tryParse(text);
   }
 }
 
