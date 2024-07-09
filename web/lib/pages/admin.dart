@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
+import 'package:universal_html/html.dart' as html;
 
 import '../components/all.dart';
 
@@ -88,23 +89,44 @@ class _AdminPageState extends State<AdminPage> {
 
   void loadRelinks() async {
     final endpoint = Uri.parse('/api/squash');
-    final headers = {'Authorization': _textController.text};
+    final headers = {'Authorization': password()};
     final response = await http.get(endpoint, headers: headers);
 
     setState(() {
       switch (response.statusCode) {
         case 200:
-          final List<dynamic> json = jsonDecode(response.body);
+          try {
+            final List<dynamic> json = jsonDecode(response.body);
 
-          _error = null;
-          _relinks = json.map((e) => RelinkType.fromJson(e)).toList();
+            _error = null;
+            _relinks = json.map((e) => RelinkType.fromJson(e)).toList();
+
+            // set the password cookie
+            if (_textController.text.isNotEmpty) {
+              html.document.cookie = 'password=${_textController.text}; samesite=strict; secure';
+            }
+          } catch (e) {
+            _error = 500;
+            _relinks = null;
+            html.document.cookie = 'password=; samesite=strict; secure';
+          }
           break;
         default:
           _error = response.statusCode;
           _relinks = null;
+          html.document.cookie = 'password=; samesite=strict; secure';
           break;
       }
     });
+  }
+
+  String password() {
+    final cookies = (html.document.cookie ?? '').split(';');
+    final password = cookies.firstWhere((cookie) => cookie.startsWith('password='), orElse: () => 'password=');
+    final parts = password.split('=');
+    final value = parts.length == 2 ? parts[1] : '';
+
+    return value.isEmpty ? _textController.text : value;
   }
 }
 
