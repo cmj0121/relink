@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import 'squash_base.dart';
 import 'squash_file.dart';
@@ -70,8 +73,8 @@ class SquashImage extends StatefulWidget {
 }
 
 class _SquashImageState extends State<SquashImage> {
+  final FileController _fileController = FileController();
   final TextEditingController _controller = TextEditingController();
-
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _hintController = TextEditingController();
   final TextEditingController _expiredController = TextEditingController();
@@ -79,6 +82,7 @@ class _SquashImageState extends State<SquashImage> {
   @override
   void dispose() {
     _controller.dispose();
+    _fileController.dispose();
     _passwordController.dispose();
     _hintController.dispose();
     _expiredController.dispose();
@@ -87,11 +91,11 @@ class _SquashImageState extends State<SquashImage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller.text.isEmpty) {
+    if (_fileController.link == null) {
       return SquashFile(
         text: AppLocalizations.of(context)!.txt_select_or_drop_image,
         mime: const ['image/*'],
-        controller: _controller,
+        controller: _fileController,
         onLoaded: () {
           setState(() {});
         },
@@ -99,6 +103,7 @@ class _SquashImageState extends State<SquashImage> {
     }
 
     return SquashBase(
+      controller: _controller,
       passwordController: _passwordController,
       hintController: _hintController,
       expiredController: _expiredController,
@@ -110,7 +115,7 @@ class _SquashImageState extends State<SquashImage> {
     return Row(
       children: [
         Flexible(
-          child: Center(child: ImageEditor(_controller.text)),
+          child: Center(child: ImageEditor(_fileController.link!)),
         ),
         IconButton(
           icon: const Icon(Icons.send),
@@ -120,7 +125,55 @@ class _SquashImageState extends State<SquashImage> {
     );
   }
 
-  void squash() {
+  void squash() async {
+    final endpoint = Uri.parse('/api/squash');
+    var request = http.MultipartRequest('POST', endpoint);
+
+    // setup the JSON payload
+    request.fields['type'] = 'image';
+    request.fields['password'] = _passwordController.text;
+    request.fields['pwd_hint'] = _hintController.text;
+    request.fields['expired_hours'] = expiredHours()?.toString() ?? '';
+
+    // setup the image file
+    final image = http.MultipartFile.fromBytes(
+      'image',
+      _fileController.bytes!,
+      filename: _fileController.name,
+      contentType: MediaType.parse(_fileController.mime!),
+    );
+    request.files.add(image);
+
+    final streamResposne = await request.send();
+    final response = await http.Response.fromStream(streamResposne);
+    setState(() {
+      switch (response.statusCode) {
+        case 201:
+          _controller.text = jsonDecode(response.body) as String;
+          break;
+        case 400:
+          _controller.text = '';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.txt_invalid_request),
+            ),
+          );
+          break;
+        default:
+          _controller.text = '';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.txt_unknown_error),
+            ),
+          );
+          break;
+      }
+    });
+  }
+
+  int? expiredHours() {
+    final text = _expiredController.text;
+    return text.isEmpty ? null : int.tryParse(text);
   }
 }
 

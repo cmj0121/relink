@@ -1,13 +1,35 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:mime/mime.dart';
 import 'package:web/web.dart' as web;
 
 import 'squash_base.dart';
 
+
+// The customised file controller that store the file link and the raw bytes
+class FileController extends ChangeNotifier {
+  String? link;
+  String? name;
+  String? mime;
+  Uint8List? bytes;
+
+  FileController({this.link, this.bytes});
+
+  @override
+  void dispose() {
+    link = null;
+    name = null;
+    mime = null;
+    bytes = null;
+    super.dispose();
+  }
+}
+
 class SquashFile extends StatefulWidget {
   final String text;
   final List<String>? mime;
-  final TextEditingController? controller;
+  final FileController? controller;
   final VoidCallback? onLoaded;
 
   const SquashFile({super.key, required this.text, this.mime, this.controller, this.onLoaded});
@@ -61,7 +83,10 @@ class _SquashFileState extends State<SquashFile> {
                 final file = files.first;
                 final link = await _controller.createFileUrl(file);
 
-                widget.controller?.text = link;
+                widget.controller?.link = link;
+                widget.controller?.name = file.name;
+                widget.controller?.mime = lookupMimeType(file.name);
+                widget.controller?.bytes = await _controller.getFileData(file);
                 widget.onLoaded?.call();
               }
             ),
@@ -79,7 +104,10 @@ class _SquashFileState extends State<SquashFile> {
           final file = ev;
           final link = await _controller.createFileUrl(file);
 
-          widget.controller?.text = link;
+          widget.controller?.link = link;
+          widget.controller?.name = file.name;
+          widget.controller?.mime = lookupMimeType(file.name);
+          widget.controller?.bytes = await _controller.getFileData(file);
           widget.onLoaded?.call();
         }
       }

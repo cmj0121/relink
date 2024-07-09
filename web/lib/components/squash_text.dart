@@ -78,6 +78,7 @@ class _SquashTextState extends State<SquashText> {
 
     final header = {'Content-Type': 'application/json'};
     final response = await http.post(endpoint, headers: header, body: jsonEncode(payload));
+
     setState(() {
       switch (response.statusCode) {
         case 201:
