@@ -181,8 +181,7 @@ class _ListTabState extends State<ListTab> {
         }
 
         final log = logs![index];
-        return Container(
-          color: index.isEven ? Colors.blueGrey.shade200 : Colors.blueGrey.shade100,
+        return Card(
           child: ListTile(
             title: Text(log.ip),
             subtitle: Text(log.userAgent),
