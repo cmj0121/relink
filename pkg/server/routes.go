@@ -105,6 +105,8 @@ func (s *Server) routeSolveSquash(c *gin.Context) {
 	case relink.Type == types.RText && relink.Text != nil:
 		// show the raw plain text
 		c.String(http.StatusOK, *relink.Text)
+	case relink.Type == types.RImage && relink.Image != nil:
+		c.Data(http.StatusOK, *relink.Mime, *relink.Image)
 	default:
 		// treat as the unauthorized request
 		link := fmt.Sprintf("/#/need-password-%v", squash)
