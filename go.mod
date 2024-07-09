@@ -4,6 +4,7 @@ go 1.22.2
 
 require (
 	github.com/alecthomas/kong v0.9.0
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/logger v1.1.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-faker/faker/v4 v4.4.2

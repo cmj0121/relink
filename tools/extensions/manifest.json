@@ -7,12 +7,12 @@
     "default_icon": "logo.png"
   },
   "background": {
-	"service_worker": "background.js"
+    "service_worker": "background.js"
   },
   "icons": {
-	  "16": "logo.png",
-	  "48": "logo.png",
-	  "128": "logo.png"
+    "16": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
   },
-  "permissions": ["contextMenus", "clipboardWrite"]
+  "permissions": ["activeTab", "contextMenus", "clipboardWrite", "scripting"]
 }

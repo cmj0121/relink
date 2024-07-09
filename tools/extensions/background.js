@@ -1,3 +1,6 @@
+const BASE_URL = "https://401.tw";
+const BASE_API = `${BASE_URL}/api/squash`;
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "relinkLink",
@@ -11,5 +14,37 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ["image"]
   });
 });
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  switch (info.menuItemId) {
+    case "relinkLink":
+      let payload = {
+        "type": "link",
+        "link": info.linkUrl,
+      };
+
+      fetch(BASE_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+      .then((response) => response.json())
+      .then((text) => copyToClipboard(text, tab));
+  }
+});
+
+function _copyToClipboard(text) {
+  navigator.clipboard.writeText(text)
+}
+
+function copyToClipboard(text, tab) {
+  chrome.scripting.executeScript({
+    target: {tabId: tab.id},
+    function: _copyToClipboard,
+    args: [text],
+  });
+}
 
 // vim: set ts=2 sw=2 et:

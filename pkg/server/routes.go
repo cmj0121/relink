@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/cmj0121/relink/pkg/types"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -35,11 +36,22 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 	fs, _ := fs.Sub(view, "web/build/web")
 	fileHandler = http.FileServer(http.FS(fs))
 
+	// allow the CORS for all requests
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	publicAPI := r.Group("/api").Use(cors.New(config))
+	{
+		publicAPI.POST("/squash", s.routeGenerateSquash)
+		// the OPTIONS method is used for the CORS preflight request
+		publicAPI.OPTIONS("/squash", func(c *gin.Context) {
+			c.JSON(http.StatusOK, nil)
+		})
+	}
+
 	// register the route for the health check
 	r.Any("/:squash", s.routeSolveSquash)
 	r.GET("/:squash/s", s.routeStatistics)
 	r.GET("/:squash/statistics", s.routeStatistics)
-	r.POST("/api/squash", s.routeGenerateSquash)
 	r.GET("/api/:squash/statistics", s.routeStatisticsSquash)
 	r.GET("/api/:squash/access-log", s.routeAccessLog)
 
