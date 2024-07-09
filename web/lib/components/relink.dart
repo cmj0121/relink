@@ -57,11 +57,13 @@ class Relink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: passwordIcon(context),
-      title: contentText(context),
-      subtitle: Text(relink.ip),
-      trailing: createdText(context),
+    return Card(
+      child: ListTile(
+        leading: passwordIcon(context),
+        title: contentText(context),
+        subtitle: Text(relink.ip),
+        trailing: createdText(context),
+      ),
     );
   }
 
@@ -97,6 +99,12 @@ class Relink extends StatelessWidget {
           onPressed: () {
             html.window.location.href = '/${relink.key}';
           },
+        ),
+        IconButton(
+          icon: const Icon(Icons.bar_chart),
+          onPressed: () {
+            Navigator.of(context).pushNamedAndRemoveUntil('/statistics-${relink.key}', (route) => false);
+          }
         ),
         Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
       ],

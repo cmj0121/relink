@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'app.dart';
 
+const String appVersion = 'v0.2.5';
+
 Future<void> main() async {
   runApp(const ReLinkApp());
 }

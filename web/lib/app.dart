@@ -8,6 +8,7 @@ enum Routes {
   pageIndex,
   pageAdminList,
   pageExpired,
+  pageStatistics,
 }
 
 void routeTo(Routes route, BuildContext context) {
