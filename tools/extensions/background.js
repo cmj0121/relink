@@ -32,6 +32,26 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       })
       .then((response) => response.json())
       .then((text) => injection(text, tab));
+      break;
+    case "relinkImage":
+      const image = info.srcUrl;
+
+      fetch(image)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const form = new FormData();
+
+        form.append("type", "image");
+        form.append("image", blob);
+
+        fetch(BASE_API, {
+          method: "POST",
+          body: form,
+        })
+        .then((response) => response.json())
+        .then((text) => injection(text, tab));
+      });
+      break;
   }
 });
 
