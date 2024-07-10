@@ -1,0 +1,18 @@
+{
+	"relink_name": {
+		"message": "ReLink 工具",
+		"description": "ReLink 主要名稱"
+	},
+	"relink_desc": {
+		"message": "ReLink 工具 - 快速產生短網址",
+		"description": "ReLink 描述"
+	},
+	"title_relink_image": {
+		"message": "ReLink 圖片 - 快速產生短網址",
+		"description": "ReLink 圖片的顯示文字"
+	},
+	"title_relink_link": {
+		"message": "ReLink 連結 - 快速產生短網址",
+		"description": "ReLink 連結的顯示文字"
+	}
+}

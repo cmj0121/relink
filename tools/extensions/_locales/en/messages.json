@@ -1,0 +1,10 @@
+{
+	"title_relink_image": {
+		"message": "ReLink the target Image",
+		"description": "Title of the ReLink Image dialog"
+	},
+	"title_relink_link": {
+		"message": "ReLink the target Link",
+		"description": "Title of the ReLink Link dialog"
+	}
+}

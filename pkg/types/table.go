@@ -206,11 +206,13 @@ func (r *Relink) IsValid() bool {
 	switch r.Type {
 	case RLink:
 		if r.Link == nil || *r.Link == "" {
+			log.Info().Msg("the link is empty")
 			return false
 		}
 
 		link, err := url.Parse(*r.Link)
 		if err != nil || link.Scheme == "" {
+			log.Info().Str("link", *r.Link).Msg("the link's schema is empty")
 			return false
 		}
 
