@@ -4,13 +4,13 @@ const BASE_API = `${BASE_URL}/api/squash`;
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "relinkLink",
-    title: "ReLink the target Link",
+    title: chrome.i18n.getMessage("title_relink_link"),
     contexts: ["link"]
   });
 
   chrome.contextMenus.create({
     id: "relinkImage",
-    title: "ReLink the target Image",
+    title: chrome.i18n.getMessage("title_relink_image"),
     contexts: ["image"]
   });
 });
