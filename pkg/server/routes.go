@@ -59,6 +59,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine, view embed.FS) {
 	{
 		auth.Use(s.AuthMiddleware())
 		auth.GET("/api/squash", s.routeListSquash)
+		auth.DELETE("/api/:squash", s.routeDeleteSquash)
 	}
 
 	// serve the static files
@@ -199,7 +200,7 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, nil)
 }
 
-// List all the squashed links.
+// (ADMIN) List all the squashed links.
 func (s *Server) routeListSquash(c *gin.Context) {
 	records := []*types.Relink{}
 
@@ -216,6 +217,20 @@ func (s *Server) routeListSquash(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, records)
+}
+
+// (ADMIN) Delete the squashed link.
+func (s *Server) routeDeleteSquash(c *gin.Context) {
+	key := c.Param("squash")
+	relink := types.Relink{Key: key}
+
+	switch err := relink.Delete(s.Conn.DB); err {
+	case nil:
+		c.JSON(http.StatusAccepted, nil)
+	default:
+		log.Warn().Err(err).Str("key", key).Msg("failed to delete the record")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 }
 
 // show the statistics of the squashed links.
