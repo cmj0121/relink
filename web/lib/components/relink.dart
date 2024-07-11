@@ -52,17 +52,32 @@ class RelinkType {
 
 class Relink extends StatelessWidget {
   final RelinkType relink;
+  final VoidCallback? onDeleted;
 
-  const Relink(this.relink, {super.key});
+  const Relink(this.relink, {super.key, this.onDeleted});
 
   @override
   Widget build(BuildContext context) {
+    final Widget subtitle = Row(
+      children: <Widget>[
+        createdText(),
+        const SizedBox(width: 10),
+        Text(relink.ip),
+      ],
+    );
+
     return Card(
       child: ListTile(
         leading: passwordIcon(context),
         title: contentText(context),
-        subtitle: Text(relink.ip),
-        trailing: createdText(context),
+        subtitle: subtitle,
+        trailing: IconButton(
+          icon: Icon(
+            Icons.delete_forever,
+            color: Colors.red.shade900,
+          ),
+          onPressed: onDeleted,
+        ),
       ),
     );
   }
@@ -111,18 +126,15 @@ class Relink extends StatelessWidget {
     );
   }
 
-  Widget createdText(BuildContext context) {
+  Widget createdText() {
     final DateFormat formatter = DateFormat('MM-dd HH:mm z');
     final DateTime createdAt = DateTime.parse(relink.createdAt);
     final DateTime? expiredAt = relink.expiredAt == null ? null : DateTime.parse(relink.expiredAt!);
 
-    return Container(
-      padding: const EdgeInsets.only(top: 20),
-      child: Text(
-        formatter.format(expiredAt ?? createdAt),
-        style: TextStyle(
-          color: expiredAt == null ? Colors.black : Colors.red,
-        ),
+    return Text(
+      formatter.format(expiredAt ?? createdAt),
+      style: TextStyle(
+        color: expiredAt == null ? Colors.black : Colors.red,
       ),
     );
   }
