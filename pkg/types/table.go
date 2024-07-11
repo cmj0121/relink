@@ -105,7 +105,7 @@ func Get(key string, db *sql.DB) (*Relink, error) {
 	stmt := `
 		SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at
 		FROM relink
-		WHERE key = ? AND deleted_at IS NULL AND expired_at IS NULL
+		WHERE key = ?
 	`
 	row := db.QueryRow(stmt, key)
 
@@ -125,7 +125,6 @@ func IterRelink(ctx context.Context, db *sql.DB) (<-chan *Relink, error) {
 	stmt := `
 		SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at
 		FROM relink
-		WHERE deleted_at IS NULL
 		ORDER BY created_at DESC
 	`
 	rows, err := db.Query(stmt)

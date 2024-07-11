@@ -130,11 +130,12 @@ class Relink extends StatelessWidget {
     final DateFormat formatter = DateFormat('MM-dd HH:mm z');
     final DateTime createdAt = DateTime.parse(relink.createdAt);
     final DateTime? expiredAt = relink.expiredAt == null ? null : DateTime.parse(relink.expiredAt!);
+    final DateTime? deletedAt = relink.deletedAt == null ? null : DateTime.parse(relink.deletedAt!);
 
     return Text(
-      formatter.format(expiredAt ?? createdAt),
+      formatter.format(deletedAt ?? expiredAt ?? createdAt),
       style: TextStyle(
-        color: expiredAt == null ? Colors.black : Colors.red,
+        color: deletedAt == null ? (expiredAt == null ? Colors.black : Colors.grey) : Colors.red,
       ),
     );
   }
