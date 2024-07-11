@@ -102,7 +102,11 @@ func RelinkFromRow(rows *sql.Row) *Relink {
 
 // Get the relink from the database.
 func Get(key string, db *sql.DB) (*Relink, error) {
-	stmt := "SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at FROM relink WHERE key = ?"
+	stmt := `
+		SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at
+		FROM relink
+		WHERE key = ?
+	`
 	row := db.QueryRow(stmt, key)
 
 	relink := RelinkFromRow(row)
@@ -118,7 +122,11 @@ func Get(key string, db *sql.DB) (*Relink, error) {
 func IterRelink(ctx context.Context, db *sql.DB) (<-chan *Relink, error) {
 	ch := make(chan *Relink)
 
-	stmt := "SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at FROM relink ORDER BY created_at DESC"
+	stmt := `
+		SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at
+		FROM relink
+		ORDER BY created_at DESC
+	`
 	rows, err := db.Query(stmt)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to query the relink")
@@ -149,7 +157,10 @@ func IterRelink(ctx context.Context, db *sql.DB) (<-chan *Relink, error) {
 
 // Insert the relink into the database.
 func (r *Relink) Insert(db *sql.DB) error {
-	sql_stmt := "INSERT INTO relink (key, ip, type, password, pwd_hint, link, text, image, mime, created_at, expired_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql_stmt := `
+		INSERT INTO relink (key, ip, type, password, pwd_hint, link, text, image, mime, created_at, expired_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`
 	_, err := db.Exec(sql_stmt, r.Key, r.IP, r.Type, r.Password, r.PwdHint, r.Link, r.Text, r.Image, r.Mime, r.CreatedAt, r.ExpiredAt)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to save the key-value pair")
@@ -177,10 +188,18 @@ func (r *Relink) Load(db *sql.DB) bool {
 
 	switch r.Type {
 	case RLink:
-		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND pwd_hint = ? AND link = ? AND deleted_at IS NULL AND expired_at IS NULL"
+		stmt := `
+			SELECT key
+			FROM relink
+			WHERE type = ? AND password = ? AND pwd_hint = ? AND link = ? AND deleted_at IS NULL AND expired_at IS NULL AND deleted_at IS NULL
+		`
 		row = db.QueryRow(stmt, r.Type, r.Password, r.PwdHint, r.Link)
 	case RText:
-		stmt := "SELECT key FROM relink WHERE type = ? AND password = ? AND pwd_hint = ?  AND text = ? AND deleted_at IS NULL AND expired_at IS NULL"
+		stmt := `
+			SELECT key
+			FROM relink
+			WHERE type = ? AND password = ? AND pwd_hint = ?  AND text = ? AND deleted_at IS NULL AND expired_at IS NULL AND deleted_at IS NULL
+		`
 		row = db.QueryRow(stmt, r.Type, r.Password, r.PwdHint, r.Text)
 	default:
 		log.Debug().Str("type", string(r.Type)).Msg("unsupported type")

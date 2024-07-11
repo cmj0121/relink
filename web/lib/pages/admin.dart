@@ -36,8 +36,19 @@ class _AdminPageState extends State<AdminPage> {
     if (_relinks != null) {
       return ListView(
         children: _relinks!.map((relink) => ClipRect(
-          child: Relink(relink),
-        )).toList(),
+          child: Relink(relink, onDeleted: () async {
+            final endpoint = Uri.parse('/api/${relink.key}');
+            final headers = {'Authorization': password()};
+            final response = await http.delete(endpoint, headers: headers);
+
+            setState(() {
+              switch (response.statusCode) {
+                case 202:
+                  _relinks!.remove(relink);
+              }
+            });
+          },
+        ))).toList(),
       );
     }
 
