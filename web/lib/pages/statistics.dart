@@ -154,7 +154,7 @@ class _ListTabState extends State<ListTab> {
             final data = json.map((e) => AccessLog.fromJson(e)).toList();
 
             logs = [...logs ?? [], ...data];
-            if (data.isEmpty) {
+            if (data.isEmpty || data.length < size) {
               hasMore = false;
             }
           } catch(e) {

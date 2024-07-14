@@ -96,6 +96,7 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFCFCFE9),
+        title: Text(widget.title),
         actions: <Widget>[
           IconButton(
             icon: Icon(RecordIcon.home.icon),
@@ -106,6 +107,13 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
             onPressed: () { routeTo(Routes.pageAdminList, context); },
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(0),
+          child: Container(
+            color: Colors.black,
+            height: 2,
+          ),
+        ),
       ),
       body: SafeArea(
         child: Center(
@@ -115,6 +123,19 @@ class _ReLinkHomePageState extends State<ReLinkHomePage> {
             child: widget.child,
           ),
         ),
+      ),
+      bottomSheet: footer(),
+    );
+  }
+
+  Widget footer() {
+    return Container(
+      color: Colors.transparent,
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text('Copyright cmj <cmj@cmj.tw>', style: TextStyle(color: Colors.grey)),
+        ],
       ),
     );
   }
