@@ -110,7 +110,10 @@ class Relink extends StatelessWidget {
       children: <Widget>[
         TextButton.icon(
           icon: relinkIcon(),
-          label: Text(relink.key),
+          label: SizedBox(
+            width: 48,
+            child: Text(relink.key),
+          ),
           onPressed: () {
             html.window.location.href = '/${relink.key}';
           },
@@ -149,6 +152,9 @@ class Relink extends StatelessWidget {
         break;
       case 'text':
         icon = RecordIcon.text.icon;
+        break;
+      case 'image':
+        icon = RecordIcon.image.icon;
         break;
     default:
       icon = RecordIcon.unknown.icon;
