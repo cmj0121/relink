@@ -150,6 +150,9 @@ class Relink extends StatelessWidget {
       case 'text':
         icon = RecordIcon.text.icon;
         break;
+      case 'image':
+        icon = RecordIcon.image.icon;
+        break;
     default:
       icon = RecordIcon.unknown.icon;
       break;
