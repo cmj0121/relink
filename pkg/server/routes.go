@@ -204,7 +204,7 @@ func (s *Server) routeGenerateSquash(c *gin.Context) {
 func (s *Server) routeListSquash(c *gin.Context) {
 	records := []*types.Relink{}
 
-	iter, err := types.IterRelink(c, s.Conn.DB)
+	iter, err := types.IterRelink(c, s.Conn.DB, types.NewIterFilter(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

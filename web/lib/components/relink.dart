@@ -60,7 +60,7 @@ class Relink extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget subtitle = LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 600) {
+        if (constraints.maxWidth < 200) {
           return Text(relink.ip);
         }
 

@@ -16,6 +16,10 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> {
   List<RelinkType>? _relinks;
   int? _error;
+  bool filterLink = true;
+  bool filterText = true;
+  bool filterImage = true;
+  bool filterDeleted = false;
 
   final _textController = TextEditingController();
 
@@ -34,21 +38,12 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     if (_relinks != null) {
-      return ListView(
-        children: _relinks!.map((relink) => ClipRect(
-          child: Relink(relink, onDeleted: () async {
-            final endpoint = Uri.parse('$basehref/api/${relink.key}');
-            final headers = {'Authorization': password()};
-            final response = await http.delete(endpoint, headers: headers);
-
-            setState(() {
-              switch (response.statusCode) {
-                case 202:
-                  _relinks!.remove(relink);
-              }
-            });
-          },
-        ))).toList(),
+      return Column(
+        children: [
+          Flexible(flex: 1, child: filterContent()),
+          const Divider(),
+          Flexible(flex: 4, child: buildContent()),
+        ],
       );
     }
 
@@ -75,6 +70,84 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
+  Widget filterContent() {
+    final icoms = [
+      RecordIcon.link,
+      RecordIcon.text,
+      RecordIcon.image,
+      RecordIcon.deleted,
+    ];
+
+    return Row(
+      children: icoms.map((icon) {
+        late bool value;
+
+        switch (icon) {
+          case RecordIcon.link:
+            value = filterLink;
+            break;
+          case RecordIcon.text:
+            value = filterText;
+            break;
+          case RecordIcon.image:
+            value = filterImage;
+            break;
+          case RecordIcon.deleted:
+            value = filterDeleted;
+            break;
+          default:
+            value = false;
+        }
+
+        return Flexible(
+          child: CheckboxListTile(
+            value: value,
+            title: Icon(icon.icon),
+            onChanged: (v) {
+              setState(() {
+                switch (icon) {
+                  case RecordIcon.link:
+                    filterLink = v!;
+                    break;
+                  case RecordIcon.text:
+                    filterText = v!;
+                    break;
+                  case RecordIcon.image:
+                    filterImage = v!;
+                    break;
+                  case RecordIcon.deleted:
+                    filterDeleted = v!;
+                    break;
+                  default:
+                    break;
+                }
+              });
+
+              loadRelinks();
+            },
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget buildContent() {
+    return ListView(
+      children: _relinks!.map((relink) => ClipRect(
+        child: Relink(relink, onDeleted: () async {
+          final endpoint = Uri.parse('$basehref/api/${relink.key}');
+          final headers = {'Authorization': password()};
+          final response = await http.delete(endpoint, headers: headers);
+
+          switch (response.statusCode) {
+            case 202:
+              loadRelinks();
+          }
+        },
+      ))).toList(),
+    );
+  }
+
   Widget passwordField(String? text) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -99,7 +172,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   void loadRelinks() async {
-    final endpoint = Uri.parse('$basehref/api/squash');
+    final endpoint = Uri.parse('$basehref/api/squash').replace(queryParameters: queries());
     final headers = {'Authorization': password()};
     final response = await http.get(endpoint, headers: headers);
 
@@ -138,6 +211,15 @@ class _AdminPageState extends State<AdminPage> {
     final value = parts.length == 2 ? parts[1] : '';
 
     return value.isEmpty ? _textController.text : value;
+  }
+
+  Map<String, String> queries() {
+    return {
+      'link': filterLink ? '1' : '0',
+      'text': filterText ? '1' : '0',
+      'image': filterImage ? '1' : '0',
+      'deleted': filterDeleted ? '1' : '0',
+    };
   }
 }
 
