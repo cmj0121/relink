@@ -37,7 +37,7 @@ class _AdminPageState extends State<AdminPage> {
       return ListView(
         children: _relinks!.map((relink) => ClipRect(
           child: Relink(relink, onDeleted: () async {
-            final endpoint = Uri.parse('/api/${relink.key}');
+            final endpoint = Uri.parse('$basehref/api/${relink.key}');
             final headers = {'Authorization': password()};
             final response = await http.delete(endpoint, headers: headers);
 
@@ -99,7 +99,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   void loadRelinks() async {
-    final endpoint = Uri.parse('/api/squash');
+    final endpoint = Uri.parse('$basehref/api/squash');
     final headers = {'Authorization': password()};
     final response = await http.get(endpoint, headers: headers);
 
