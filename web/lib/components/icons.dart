@@ -16,6 +16,7 @@ enum RecordIcon {
   password,
   settings,
   workInProgress,
+  deleted,
 }
 
 extension RecordIconExtension on RecordIcon {
@@ -35,6 +36,7 @@ extension RecordIconExtension on RecordIcon {
     RecordIcon.password: Icons.key_sharp,
     RecordIcon.settings: Icons.settings,
     RecordIcon.workInProgress: Icons.build_sharp,
+    RecordIcon.deleted: Icons.delete_forever,
   };
 
   IconData get icon => values[this]!;

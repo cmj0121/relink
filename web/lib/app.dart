@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'icons.dart';
 import 'page.dart';
+import '../components/icons.dart';
 
 enum Routes {
   pageIndex,
