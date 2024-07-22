@@ -41,12 +41,10 @@ class _AdminPageState extends State<AdminPage> {
             final headers = {'Authorization': password()};
             final response = await http.delete(endpoint, headers: headers);
 
-            setState(() {
-              switch (response.statusCode) {
-                case 202:
-                  _relinks!.remove(relink);
-              }
-            });
+            switch (response.statusCode) {
+              case 202:
+                loadRelinks();
+            }
           },
         ))).toList(),
       );
