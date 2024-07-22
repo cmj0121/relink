@@ -58,12 +58,20 @@ class Relink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget subtitle = Row(
-      children: <Widget>[
-        createdText(),
-        const SizedBox(width: 10),
-        Text(relink.ip),
-      ],
+    final Widget subtitle = LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          return Text(relink.ip);
+        }
+
+        return Row(
+          children: <Widget>[
+            createdText(),
+            const SizedBox(width: 10),
+            Text(relink.ip),
+          ],
+        );
+      },
     );
 
     return Card(
@@ -84,6 +92,7 @@ class Relink extends StatelessWidget {
 
   Widget passwordIcon(BuildContext context) {
     final Widget passwordIcon = IconButton(
+      padding: EdgeInsets.zero,
       icon: Icon(RecordIcon.lock.icon),
       onPressed: relink.password == null ? null : () {
         Clipboard.setData(ClipboardData(text: relink.password!));
@@ -108,14 +117,18 @@ class Relink extends StatelessWidget {
 
     return Row(
       children: <Widget>[
-        TextButton.icon(
-          icon: relinkIcon(),
-          label: SizedBox(
-            width: 48,
-            child: Text(relink.key),
-          ),
-          onPressed: () {
-            html.window.location.href = '/${relink.key}';
+        InkWell(
+          child: relinkIcon(),
+          onTap: () {
+            Clipboard.setData(ClipboardData(text: relink.key));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.txt_copied_to_clipboard(relink.key)),
+              ),
+            );
+          },
+          onLongPress: () {
+            html.window.open('/${relink.key}', relink.key);
           },
         ),
         IconButton(
