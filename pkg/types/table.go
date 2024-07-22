@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -119,14 +120,23 @@ func Get(key string, db *sql.DB) (*Relink, error) {
 }
 
 // Iterate the relink from the database.
-func IterRelink(ctx context.Context, db *sql.DB) (<-chan *Relink, error) {
+func IterRelink(ctx context.Context, db *sql.DB, filters ...*IterFilter) (<-chan *Relink, error) {
 	ch := make(chan *Relink)
 
-	stmt := `
+	filter := NewIterFilter(nil)
+	filter.Merge(filters...)
+
+	include_deleted := "AND deleted_at IS NULL"
+	if filter.Deleted {
+		include_deleted = ""
+	}
+
+	stmt := fmt.Sprintf(`
 		SELECT key, ip, type, password, pwd_hint, link, text, image, mime, created_at, deleted_at, expired_at
 		FROM relink
+		WHERE type IN (%v) %v
 		ORDER BY created_at DESC
-	`
+	`, filter.Types(), include_deleted)
 	rows, err := db.Query(stmt)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to query the relink")

@@ -19,7 +19,7 @@ class _AdminPageState extends State<AdminPage> {
   bool filterLink = true;
   bool filterText = true;
   bool filterImage = true;
-  bool filterDeleted = true;
+  bool filterDeleted = false;
 
   final _textController = TextEditingController();
 
