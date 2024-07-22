@@ -59,7 +59,7 @@ class _ChartTabState extends State<ChartTab> {
   }
 
   Future<void> loadStatistics() async {
-    final String endpoint = '/api/${widget.code}/statistics';
+    final String endpoint = '$basehref/api/${widget.code}/statistics';
     final response = await http.get(Uri.parse(endpoint));
 
     setState(() {
@@ -143,7 +143,7 @@ class _ListTabState extends State<ListTab> {
 
     const int size = 40;
     final int page = (logs?.length ?? 0) ~/ size;
-    final String endpoint = '/api/${widget.code}/access-log?page=$page&size=$size';
+    final String endpoint = '$basehref/api/${widget.code}/access-log?page=$page&size=$size';
     final response = await http.get(Uri.parse(endpoint));
 
     setState(() {

@@ -6,6 +6,7 @@ import 'package:http_parser/http_parser.dart';
 
 import 'squash_base.dart';
 import 'squash_file.dart';
+import 'defines.dart';
 
 
 class ImageEditor extends StatefulWidget {
@@ -126,7 +127,7 @@ class _SquashImageState extends State<SquashImage> {
   }
 
   void squash() async {
-    final endpoint = Uri.parse('/api/squash');
+    final endpoint = Uri.parse('$basehref/api/squash');
     var request = http.MultipartRequest('POST', endpoint);
 
     // setup the JSON payload

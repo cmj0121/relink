@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 
 import 'squash_base.dart';
+import 'defines.dart';
 
 class SquashText extends StatefulWidget {
   const SquashText({super.key});
@@ -67,7 +68,7 @@ class _SquashTextState extends State<SquashText> {
   }
 
   void squash() async {
-    final endpoint = Uri.parse('/api/squash');
+    final endpoint = Uri.parse('$basehref/api/squash');
     final Map<String, dynamic> payload = {
       'type': 'text',
       'text': _textController.text,

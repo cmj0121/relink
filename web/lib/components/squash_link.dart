@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 
 import 'squash_base.dart';
+import 'defines.dart';
 
 class SquashLink extends StatefulWidget {
   const SquashLink({super.key});
@@ -55,7 +56,7 @@ class _SquashLinkState extends State<SquashLink> {
   }
 
   void squash() async {
-    final endpoint = Uri.parse('/api/squash');
+    final endpoint = Uri.parse('$basehref/api/squash');
     final Map<String, dynamic> payload = {
       'type': 'link',
       'link': _linkController.text,
