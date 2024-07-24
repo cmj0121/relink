@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 import 'icons.dart';
 import 'loading.dart';
@@ -131,7 +131,7 @@ class _SquashBaseState extends State<SquashBase> {
 
   Widget squashedQRCode(String link) {
     return InkWell(
-      child: QrImageView(data: link),
+      child: buildQRCode(link),
       onTap: () => floatImage(link),
     );
   }
@@ -152,13 +152,30 @@ class _SquashBaseState extends State<SquashBase> {
                 children: [
                   Text(link),
                   const SizedBox(height: 10),
-                  Flexible(child: QrImageView(data: link)),
+                  Flexible(child: buildQRCode(link)),
                 ],
               ),
             )
           ),
         );
       }
+    );
+  }
+
+  Widget buildQRCode(String link) {
+    final qrCode = QrCode(
+      8,
+      QrErrorCorrectLevel.H,
+    )..addData(link);
+
+    return PrettyQrView(
+      qrImage: QrImage(qrCode),
+      decoration: const PrettyQrDecoration(
+        image: PrettyQrDecorationImage(
+          image: AssetImage('assets/images/logo.png'),
+          position: PrettyQrDecorationImagePosition.embedded,
+        ),
+      ),
     );
   }
 
